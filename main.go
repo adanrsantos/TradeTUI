@@ -5,17 +5,18 @@ import (
 	"os"
 
 	tea "charm.land/bubbletea/v2"
+	lipgloss "charm.land/lipgloss/v2"
 )
 
 type model struct {
-	choices []string
-	cursor int
+	choices  []string
+	cursor   int
 	selected map[int]struct{}
 }
 
 func initialModel() model {
 	return model{
-		choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+		choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
 		selected: make(map[int]struct{}),
 	}
 }
@@ -72,9 +73,24 @@ func (m model) View() tea.View {
 }
 
 func main() {
+	style := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("63"))
+
+	anotherStyle := lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("228")).
+		BorderBackground(lipgloss.Color("63")).
+		BorderTop(true).
+		BorderLeft(true)
+
+	lipgloss.Println(style.Render("Hello, kitty"))
+	lipgloss.Println(anotherStyle.Render("I love burgers"))
+
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
+
 }
