@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/adanrsantos/TradeTUI/types"
 	"github.com/adanrsantos/TradeTUI/ui"
@@ -11,164 +12,134 @@ import (
 	lipgloss "charm.land/lipgloss/v2"
 )
 
-var (
-	mainStyle = lipgloss.NewStyle().Width(50).Height(15)
-	mainMenuStyle = lipgloss.NewStyle().Width(50).Height(10).Border(lipgloss.RoundedBorder())
-
-	sideStyle = lipgloss.NewStyle().Height(15)
-
-	boxStyle = lipgloss.NewStyle().Width(20).Height(5).Border(lipgloss.RoundedBorder())
-)
-
-func (m model) leftHeader() string {
-	return lipgloss.NewStyle().
-		Foreground(lipgloss.Color("62")).
-		Height(5).
-		Bold(true).
-		Render(ui.AsciiTradeTUI())
-}
-
-func (m model) leftMenu() string {
-	choices := m.choices()
-
-	menu := ""
-
-	for i, choice := range choices {
-		cursor := " "
-		if m.cursor == i {
-			cursor = ">"
-		}
-
-		menu += fmt.Sprintf("%s %s\n", cursor, choice)
-	}
-
-	return mainMenuStyle.Render(menu)
-}
-
-func (m model) leftPanel() string {
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		m.leftHeader(),
-		m.leftMenu(),
-	)
-}
-
-func (m model) rightPanel() string {
-	box1 := boxStyle.Render(fmt.Sprintf(
-		"TimeFrame\n%s",
-		m.config.TimeFrame,
-	))
-
-	box2 := boxStyle.Render(fmt.Sprintf(
-		"Symbol\n%s",
-		m.config.Symbol,
-	))
-
-	box3 := boxStyle.Render(fmt.Sprintf(
-		"Limit\n%d",
-		m.config.Limit,
-	))
-
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		box1,
-		box2,
-		box3,
-	)
-}
-
-func (m model) configView() string {
-	return fmt.Sprintf(
-		"Query Config\n\nTimeFrame: %s\nSymbol: %s\nStart: %v\nEnd: %v\nLimit: %d",
-		m.config.TimeFrame,
-		m.config.Symbol,
-		m.config.StartDate,
-		m.config.EndDate,
-		m.config.Limit,
-	)
-}
-
 type model struct {
-	screen ui.Screen
-	cursor int
-	config types.QueryConfig
+	types.Model
 }
 
-func (m model) choices() []string {
-	switch m.screen {
-	case ui.MainMenu:
-		return []string{
-			"TimeFrame",
-			"Symbol",
-			"Start Date",
-			"End Date",
-			"Limit",
-		}
-	case ui.TimeFrameMenu:
-		return []string{
-			string(types.OneSecond),
-			string(types.OneMinute),
-			string(types.FifteenMinute),
-			string(types.OneHour),
-			string(types.FourHour),
-			string(types.Daily),
-		}
-	case ui.SymbolMenu:
-		return []string{
-			string(types.NQ),
-			string(types.ES),
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		switch msg.String() {
+		case "crtl+c", "q":
+			return m, tea.Quit
+
+		case "up", "k":
+			if m.Focus == ui.MainMenuFocus && m.MainMenuCursor > 0 {
+				m.MainMenuCursor--
+			}
+			if m.Focus == ui.SubmitFocus && m.SubmitCursor > 0 {
+				m.SubmitCursor--
+			}
+
+		case "down", "j":
+			if m.Focus == ui.MainMenuFocus && m.MainMenuCursor < len(ui.MenuChoices(&m.Model))-1 {
+				m.MainMenuCursor++
+			}
+			if m.Focus == ui.SubmitFocus && m.SubmitCursor < len(ui.SubmitChoices())-1 {
+				m.SubmitCursor++
+			}
+
+		case "enter":
+			switch m.Focus {
+			case ui.MainMenuFocus:
+				switch m.Screen {
+				case ui.MainMenuView:
+					if m.MainMenuCursor < len(ui.MainMenuChoices) {
+						m.Screen = ui.MainMenuChoices[m.MainMenuCursor].Target
+					}
+				case ui.TimeFrameMenuView:
+					if m.MainMenuCursor < len(ui.TimeFrameChoices) {
+						m.Config.TimeFrame = ui.TimeFrameChoices[m.MainMenuCursor]
+					}
+					m.Screen = ui.MainMenuView
+				case ui.SymbolMenuView:
+					if m.MainMenuCursor < len(ui.SymbolChoices) {
+						m.Config.Symbol = ui.SymbolChoices[m.MainMenuCursor]
+					}
+					m.Screen = ui.MainMenuView
+				case ui.StartDateMenuView:
+					if m.MainMenuCursor < len(ui.DatePresets) {
+						m.Config.StartDate = ui.DatePresets[m.MainMenuCursor].Value()
+					}
+					m.Screen = ui.MainMenuView
+				case ui.EndDateMenuView:
+					if m.MainMenuCursor < len(ui.DatePresets) {
+						m.Config.EndDate = ui.DatePresets[m.MainMenuCursor].Value()
+					}
+					m.Screen = ui.MainMenuView
+				case ui.LimitMenuView:
+					if m.MainMenuCursor < len(ui.LimitChoices) {
+						m.Config.Limit = int(ui.LimitChoices[m.MainMenuCursor])
+					}
+					m.Screen = ui.MainMenuView
+				}
+				m.MainMenuCursor = 0
+			case ui.SubmitFocus:
+				switch m.SubmitCursor {
+				case 0:
+					if m.Config.TimeFrame != "" && m.Config.Symbol != "" && !m.Config.StartDate.IsZero() && !m.Config.EndDate.IsZero() && m.Config.Limit >= 0 {
+						newItem := types.HistoryItem{
+							Config:    m.Config,
+							Timestamp: time.Now(),
+						}
+
+						m.History = append(m.History, newItem)
+
+						m.Config = types.QueryConfig{}
+						m.Config.Limit = -1
+						m.Err = ""
+					} else {
+						m.Err = "Missing fields!"
+					}
+				case 1:
+					m.Config = types.QueryConfig{}
+					m.Config.Limit = -1
+					m.Err = ""
+				}
+			}
+
+		case "esc", "backspace":
+			if m.Screen != ui.MainMenuView {
+				m.MainMenuCursor = 0
+				m.Screen = ui.MainMenuView
+			}
+
+		case "tab":
+			m.MainMenuCursor = 0
+			m.SubmitCursor = 0
+			if m.Focus == ui.MainMenuFocus {
+				m.Focus = ui.SubmitFocus
+			} else {
+				m.Focus = ui.MainMenuFocus
+			}
 		}
 	}
 
-	return nil
+	return m, nil
 }
 
-func (m model) handleEnter() model {
-	switch m.screen {
-
-	case ui.MainMenu:
-		switch m.cursor {
-		case 0:
-			m.screen = ui.TimeFrameMenu
-		case 1:
-			m.screen = ui.SymbolMenu
-		}
-		m.cursor = 0
-
-	case ui.TimeFrameMenu:
-		options := []types.TimeFrame{
-			types.OneSecond,
-			types.OneMinute,
-			types.FifteenMinute,
-			types.OneHour,
-			types.FourHour,
-			types.Daily,
-		}
-		m.config.TimeFrame = options[m.cursor]
-		m.screen = ui.MainMenu
-		m.cursor = 0
-
-	case ui.SymbolMenu:
-		options := []types.Symbol{
-			types.NQ,
-			types.ES,
-		}
-		m.config.Symbol = options[m.cursor]
-		m.screen = ui.MainMenu
-		m.cursor = 0
-	}
-
-	return m
+func (m model) View() tea.View {
+	return tea.NewView(
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			ui.LeftSide(&m.Model),
+			ui.RightSide(&m.Model),
+		),
+	)
 }
 
 func initialModel() model {
 	return model{
-		screen: ui.MainMenu,
-		cursor: 0,
-		config: types.QueryConfig{
-			TimeFrame: types.OneMinute,
-			Symbol:    types.NQ,
-			Limit:     100,
+		Model: types.Model{
+			Screen: ui.MainMenuView,
+			Config: types.QueryConfig{
+				TimeFrame: "",
+				Symbol:    "",
+				Limit:     -1,
+			},
+			Focus:          ui.MainMenuFocus,
+			MainMenuCursor: 0,
+			SubmitCursor:   0,
 		},
 	}
 }
@@ -177,50 +148,10 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-
-	case tea.KeyPressMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-
-		case "down", "j":
-			if m.cursor < len(m.choices())-1 {
-				m.cursor++
-			}
-
-		case "enter":
-			return m.handleEnter(), nil
-		}
-	}
-
-	return m, nil
-}
-
-func (m model) View() tea.View {
-	leftPanel := mainStyle.Render(m.leftPanel())
-	rightPanel := sideStyle.Render(m.rightPanel())
-
-	return tea.NewView(
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			leftPanel,
-			rightPanel,
-		),
-	)
-}
-
 func main() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
-
 }

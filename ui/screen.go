@@ -1,9 +1,19 @@
 package ui
 
-type Screen int
+import (
+	"github.com/adanrsantos/TradeTUI/types"
+)
 
 const (
-	MainMenu Screen = iota
-	TimeFrameMenu
-	SymbolMenu
+	MainMenuView types.MenuScreen = iota
+	TimeFrameMenuView
+	SymbolMenuView
+	StartDateMenuView
+	EndDateMenuView
+	LimitMenuView
+)
+
+const (
+	MainMenuFocus types.Focus = iota
+	SubmitFocus
 )
