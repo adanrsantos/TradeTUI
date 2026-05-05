@@ -49,14 +49,14 @@ var LimitChoices = []types.Limit{
 	types.OneThousand,
 }
 
-func LeftSide(m *types.Model) string {
+func LeftSide(m *types.Model, width int) string {
 	style := LeftSideStyle
 
 	return style.Render(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
 			MainHeader(m),
-			MainMenuPanel(m),
+			MainMenuPanel(m, width),
 		),
 	)
 }
@@ -96,8 +96,10 @@ func MainHeader(m *types.Model) string {
 	return style.Render(AsciiTradeTUI())
 }
 
-func MainMenuPanel(m *types.Model) string {
-	style := MainMenuStyle
+func MainMenuPanel(m *types.Model, width int) string {
+	availableWidth := width - 2
+	
+	style := MainMenuStyle.Width(availableWidth)
 	header := PanelHeaderStyle
 
 	if m.Focus == MainMenuFocus {

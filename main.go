@@ -14,10 +14,17 @@ import (
 
 type model struct {
 	types.Model
+	width int
+	height int
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		
+		return m, nil
 	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "crtl+c", "q":
@@ -119,13 +126,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() tea.View {
-	return tea.NewView(
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			ui.LeftSide(&m.Model),
-			ui.RightSide(&m.Model),
-		),
-	)
+	minLeftWidth := 50
+	minRightWidth := 25
+
+	leftWidth := int(float64(m.width) * 0.6)
+	rightWidth := m.width - leftWidth
+
+	if leftWidth < minLeftWidth { leftWidth = minLeftWidth }
+    if rightWidth < minRightWidth { rightWidth = minRightWidth }
+
+	leftSideStyle := ui.LeftSideStyle.Copy().Width(leftWidth).Height(m.height - 2)
+    rightSideStyle := ui.RightSideStyle.Copy().Width(rightWidth)
+
+    return tea.NewView(
+        lipgloss.JoinHorizontal(
+            lipgloss.Top,
+            leftSideStyle.Render(ui.LeftSide(&m.Model, leftWidth)),
+            rightSideStyle.Render(ui.RightSide(&m.Model)),
+        ),
+    )
 }
 
 func initialModel() model {

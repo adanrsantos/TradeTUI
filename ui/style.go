@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	LeftSideStyle = lipgloss.NewStyle().Width(50).Height(16)
+	LeftSideStyle = lipgloss.NewStyle().Height(16)
 	RightSideStyle = lipgloss.NewStyle().Width(25).Height(5)
 
 	MainMenuStyle = lipgloss.NewStyle().Width(50).Height(11).Border(lipgloss.RoundedBorder())
