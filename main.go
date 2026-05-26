@@ -3,172 +3,20 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
-	"github.com/adanrsantos/TradeTUI/types"
-	"github.com/adanrsantos/TradeTUI/ui"
+	"github.com/adanrsantos/TradeTUI/internals/providers/databento"
+	"github.com/adanrsantos/TradeTUI/internals/app"
 
 	tea "charm.land/bubbletea/v2"
-	lipgloss "charm.land/lipgloss/v2"
 )
 
-type model struct {
-	types.Model
-	width int
-	height int
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		
-		return m, nil
-	case tea.KeyPressMsg:
-		switch msg.String() {
-		case "crtl+c", "q":
-			return m, tea.Quit
-
-		case "up", "k":
-			if m.Focus == ui.MainMenuFocus && m.MainMenuCursor > 0 {
-				m.MainMenuCursor--
-			}
-			if m.Focus == ui.SubmitFocus && m.SubmitCursor > 0 {
-				m.SubmitCursor--
-			}
-
-		case "down", "j":
-			if m.Focus == ui.MainMenuFocus && m.MainMenuCursor < len(ui.MenuChoices(&m.Model))-1 {
-				m.MainMenuCursor++
-			}
-			if m.Focus == ui.SubmitFocus && m.SubmitCursor < len(ui.SubmitChoices())-1 {
-				m.SubmitCursor++
-			}
-
-		case "enter":
-			switch m.Focus {
-			case ui.MainMenuFocus:
-				switch m.Screen {
-				case ui.MainMenuView:
-					if m.MainMenuCursor < len(ui.MainMenuChoices) {
-						m.Screen = ui.MainMenuChoices[m.MainMenuCursor].Target
-					}
-				case ui.TimeFrameMenuView:
-					if m.MainMenuCursor < len(ui.TimeFrameChoices) {
-						m.Config.TimeFrame = ui.TimeFrameChoices[m.MainMenuCursor]
-					}
-					m.Screen = ui.MainMenuView
-				case ui.SymbolMenuView:
-					if m.MainMenuCursor < len(ui.SymbolChoices) {
-						m.Config.Symbol = ui.SymbolChoices[m.MainMenuCursor]
-					}
-					m.Screen = ui.MainMenuView
-				case ui.StartDateMenuView:
-					if m.MainMenuCursor < len(ui.DatePresets) {
-						m.Config.StartDate = ui.DatePresets[m.MainMenuCursor].Value()
-					}
-					m.Screen = ui.MainMenuView
-				case ui.EndDateMenuView:
-					if m.MainMenuCursor < len(ui.DatePresets) {
-						m.Config.EndDate = ui.DatePresets[m.MainMenuCursor].Value()
-					}
-					m.Screen = ui.MainMenuView
-				case ui.LimitMenuView:
-					if m.MainMenuCursor < len(ui.LimitChoices) {
-						m.Config.Limit = int(ui.LimitChoices[m.MainMenuCursor])
-					}
-					m.Screen = ui.MainMenuView
-				}
-				m.MainMenuCursor = 0
-			case ui.SubmitFocus:
-				switch m.SubmitCursor {
-				case 0:
-					if m.Config.TimeFrame != "" && m.Config.Symbol != "" && !m.Config.StartDate.IsZero() && !m.Config.EndDate.IsZero() && m.Config.Limit >= 0 {
-						newItem := types.HistoryItem{
-							Config:    m.Config,
-							Timestamp: time.Now(),
-						}
-
-						m.History = append(m.History, newItem)
-
-						m.Config = types.QueryConfig{}
-						m.Config.Limit = -1
-						m.Err = ""
-					} else {
-						m.Err = "Missing fields!"
-					}
-				case 1:
-					m.Config = types.QueryConfig{}
-					m.Config.Limit = -1
-					m.Err = ""
-				}
-			}
-
-		case "esc", "backspace":
-			if m.Screen != ui.MainMenuView {
-				m.MainMenuCursor = 0
-				m.Screen = ui.MainMenuView
-			}
-
-		case "tab":
-			m.MainMenuCursor = 0
-			m.SubmitCursor = 0
-			if m.Focus == ui.MainMenuFocus {
-				m.Focus = ui.SubmitFocus
-			} else {
-				m.Focus = ui.MainMenuFocus
-			}
-		}
-	}
-
-	return m, nil
-}
-
-func (m model) View() tea.View {
-	minLeftWidth := 50
-	minRightWidth := 25
-
-	leftWidth := int(float64(m.width) * 0.6)
-	rightWidth := m.width - leftWidth
-
-	if leftWidth < minLeftWidth { leftWidth = minLeftWidth }
-    if rightWidth < minRightWidth { rightWidth = minRightWidth }
-
-	leftSideStyle := ui.LeftSideStyle.Copy().Width(leftWidth).Height(m.height - 2)
-    rightSideStyle := ui.RightSideStyle.Copy().Width(rightWidth)
-
-    return tea.NewView(
-        lipgloss.JoinHorizontal(
-            lipgloss.Top,
-            leftSideStyle.Render(ui.LeftSide(&m.Model, leftWidth)),
-            rightSideStyle.Render(ui.RightSide(&m.Model)),
-        ),
-    )
-}
-
-func initialModel() model {
-	return model{
-		Model: types.Model{
-			Screen: ui.MainMenuView,
-			Config: types.QueryConfig{
-				TimeFrame: "",
-				Symbol:    "",
-				Limit:     -1,
-			},
-			Focus:          ui.MainMenuFocus,
-			MainMenuCursor: 0,
-			SubmitCursor:   0,
-		},
-	}
-}
-
-func (m model) Init() tea.Cmd {
-	return nil
-}
-
 func main() {
-	p := tea.NewProgram(initialModel())
+	provider := databento.New()
+
+	model := app.New(provider)
+
+	p := tea.NewProgram(model)
+
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)

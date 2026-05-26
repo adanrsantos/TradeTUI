@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adanrsantos/TradeTUI/types"
+	"github.com/adanrsantos/TradeTUI/internals/providers/databento/types"
 
 	"charm.land/bubbles/v2/progress"
 	lipgloss "charm.land/lipgloss/v2"

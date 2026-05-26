@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"github.com/adanrsantos/TradeTUI/types"
+	"github.com/adanrsantos/TradeTUI/internals/providers/databento/types"
 )
 
 const (
