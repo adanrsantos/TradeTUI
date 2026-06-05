@@ -49,56 +49,9 @@ var LimitChoices = []types.Limit{
 	types.OneThousand,
 }
 
-func LeftSide(m *types.Model, width int) string {
-	style := LeftSideStyle
-
-	return style.Render(
-		lipgloss.JoinVertical(
-			lipgloss.Left,
-			MainHeader(m),
-			MainMenuPanel(m, width),
-		),
-	)
-}
-
-func RightSide(m *types.Model) string {
-	style := RightSideStyle
-
-	return style.Render(
-		lipgloss.JoinVertical(
-			lipgloss.Left,
-			HistoryPanel(m),
-			QueryViewPanel(m),
-			SubmitPanel(m),
-		),
-	)
-}
-
-func MainHeader(m *types.Model) string {
-	style := MainHeaderStyle
-
-	if m.Focus == MainMenuFocus && m.Screen != MainMenuView {
-		switch m.Screen {
-		case TimeFrameMenuView:
-			return style.Foreground(lipgloss.Color("12")).Render(AsciiTimeFrame())
-		case SymbolMenuView:
-			return style.Foreground(lipgloss.Color("12")).Render(AsciiSymbol())
-		case StartDateMenuView:
-			return style.Foreground(lipgloss.Color("12")).Render(AsciiStartDate())
-		case EndDateMenuView:
-			return style.Foreground(lipgloss.Color("12")).Render(AsciiEndDate())
-		case LimitMenuView:
-			return style.Foreground(lipgloss.Color("12")).Render(AsciiLimit())
-		}
-		return style.Render(AsciiTradeTUI())
-	}
-
-	return style.Render(AsciiTradeTUI())
-}
-
 func MainMenuPanel(m *types.Model, width int) string {
 	availableWidth := width - 2
-	
+
 	style := MainMenuStyle.Width(availableWidth)
 	header := PanelHeaderStyle
 
@@ -281,45 +234,4 @@ func QueryViewPanel(m *types.Model) string {
 			info,
 		),
 	)
-}
-
-func SubmitPanel(m *types.Model) string {
-	style := BoxStyle
-
-	if m.Focus == SubmitFocus {
-		style = style.BorderForeground(lipgloss.Color("205"))
-	}
-
-	menu := ""
-	choices := SubmitChoices()
-
-	for i, choice := range choices {
-		cursor := " "
-		if m.SubmitCursor == i && m.Focus == SubmitFocus {
-			cursor = ">"
-		}
-
-		menu += fmt.Sprintf("%s %s", cursor, choice)
-
-		if i < len(choices)-1 {
-			menu += "\n"
-		}
-	}
-
-	if m.Err != "" {
-		menu += "\n"
-		return style.Render(
-			lipgloss.JoinVertical(
-				lipgloss.Left,
-				menu,
-				lipgloss.NewStyle().Foreground(lipgloss.Color("1")).Render(m.Err),
-			),
-		)
-	}
-
-	return style.Render(menu)
-}
-
-func SubmitChoices() []string {
-	return []string{"Submit", "Reset"}
 }

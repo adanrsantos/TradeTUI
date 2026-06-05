@@ -13,7 +13,7 @@ import (
 
 type DataBentoModel struct {
 	types.Model
-	width int
+	width  int
 	height int
 }
 
@@ -47,9 +47,6 @@ func (m DataBentoModel) Update(msg tea.Msg) (providers.Provider, tea.Cmd) {
 		case "down", "j":
 			if m.Focus == ui.MainMenuFocus && m.MainMenuCursor < len(ui.MenuChoices(&m.Model))-1 {
 				m.MainMenuCursor++
-			}
-			if m.Focus == ui.SubmitFocus && m.SubmitCursor < len(ui.SubmitChoices())-1 {
-				m.SubmitCursor++
 			}
 
 		case "enter":
@@ -138,17 +135,16 @@ func (m DataBentoModel) View(width, height int) tea.View {
 	leftWidth := int(float64(m.width) * 0.6)
 	rightWidth := m.width - leftWidth
 
-	if leftWidth < minLeftWidth { leftWidth = minLeftWidth }
-    if rightWidth < minRightWidth { rightWidth = minRightWidth }
+	if leftWidth < minLeftWidth {
+		leftWidth = minLeftWidth
+	}
+	if rightWidth < minRightWidth {
+		rightWidth = minRightWidth
+	}
 
-	leftSideStyle := ui.LeftSideStyle.Copy().Width(leftWidth).Height(m.height - 2)
-    rightSideStyle := ui.RightSideStyle.Copy().Width(rightWidth)
-
-    return tea.NewView(
-        lipgloss.JoinHorizontal(
-            lipgloss.Top,
-            leftSideStyle.Render(ui.LeftSide(&m.Model, leftWidth)),
-            rightSideStyle.Render(ui.RightSide(&m.Model)),
-        ),
-    )
+	return tea.NewView(
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+		),
+	)
 }

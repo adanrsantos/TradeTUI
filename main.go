@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/adanrsantos/TradeTUI/internals/providers/databento"
 	"github.com/adanrsantos/TradeTUI/internals/app"
+	"github.com/adanrsantos/TradeTUI/internals/providers/databento"
 
 	tea "charm.land/bubbletea/v2"
 )
