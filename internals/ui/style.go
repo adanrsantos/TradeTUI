@@ -11,5 +11,6 @@ var (
 	MainHeaderStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("45")).Height(5).Bold(true)
 	PanelHeaderStyle = lipgloss.NewStyle().Bold(true)
 
-	BoxStyle = lipgloss.NewStyle().Width(25).Border(lipgloss.RoundedBorder())
+	MainMenuStyle = lipgloss.NewStyle().Width(50).Height(11).Border(lipgloss.RoundedBorder())
+	BoxStyle      = lipgloss.NewStyle().Width(25).Border(lipgloss.RoundedBorder())
 )

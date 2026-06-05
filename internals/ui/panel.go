@@ -43,7 +43,7 @@ func MainHeader(m *types.Model) string {
 }
 
 func SettingMainMenu(m *types.Model) string {
-	style := BoxStyle
+	style := MainMenuStyle
 	header := PanelHeaderStyle
 
 	if m.Focus == types.MainMenuFocus {
