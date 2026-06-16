@@ -1,13 +1,19 @@
 package alpha
 
-import tea "charm.land/bubbletea/v2"
+import (
+	tea "charm.land/bubbletea/v2"
+	"github.com/adanrsantos/TradeTUI/types"
+)
 
 type model struct {
+	cfg    *types.Config
 	cursor int
 }
 
-func New() model {
-	return model{}
+func New(cfg *types.Config) *model {
+	return &model{
+		cfg: cfg,
+	}
 }
 
 func (m model) Init() tea.Cmd {
