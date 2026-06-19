@@ -6,12 +6,7 @@ import (
 	"github.com/adanrsantos/TradeTUI/types"
 )
 
-type MenuItem struct {
-	Label  string
-	Target string
-}
-
-var SettingMenuChoices = []MenuItem{
+var SettingMenuChoices = []types.MenuItem{
 	{Label: "Databento", Target: "databento"},
 	{Label: "Alpha", Target: "alpha"},
 }

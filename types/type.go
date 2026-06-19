@@ -7,6 +7,11 @@ type Model struct {
 	StateFilePath string
 }
 
+type MenuItem struct {
+	Label  string
+	Target string
+}
+
 type Screen int
 
 const (
