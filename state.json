@@ -4,5 +4,10 @@
   "language": "en-US",
   "current_provider": "databento"
  },
- "Provider": {}
+ "Provider": {
+  "databento": {
+   "api_key": "hello"
+  },
+  "alpha": {}
+ }
 }

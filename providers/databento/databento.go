@@ -7,13 +7,17 @@ import (
 )
 
 type model struct {
-	cfg   *types.Config
 	model databentoModel
 }
 
-func New(cfg *types.Config) *model {
+func New(cfg *types.ProviderDetails) *model {
 	return &model{
-		cfg: cfg,
+		model: databentoModel{
+			settingCursor: 0,
+			mainCursor:    0,
+			focus:         MainFocus,
+			cfg:           cfg,
+		},
 	}
 }
 
@@ -26,6 +30,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
+		case "/":
+			m.model.cfg.APIKey = "hello"
+			return m, func() tea.Msg {
+				return types.SaveConfigMsg{}
+			}
+		case ".":
+			m.model.cfg.APIKey = "bye"
+			return m, func() tea.Msg {
+				return types.SaveConfigMsg{}
+			}
 		case "tab":
 			if m.model.focus == MainFocus {
 				m.model.focus = SettingFocus

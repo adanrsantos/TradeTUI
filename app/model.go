@@ -27,7 +27,15 @@ func New() model {
 		log.Fatalf("Error loading config file: %v", err)
 	}
 
-	databentoModel := databento.New(config)
+	if config.Provider.Databento == nil {
+		config.Provider.Databento = &types.ProviderDetails{}
+	}
+
+	if config.Provider.Alpha == nil {
+		config.Provider.Alpha = &types.ProviderDetails{}
+	}
+
+	databentoModel := databento.New(config.Provider.Databento)
 	alphaModel := alpha.New(config)
 
 	availableProviders := map[string]tea.Model{
@@ -68,7 +76,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case types.SaveConfigMsg:
+		if err := saveConfig(m.StateFilePath, m.Cfg); err != nil {
+			log.Printf("Error saving config after API call: %v", err)
+		}
+		return m, nil
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
