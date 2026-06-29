@@ -6,13 +6,17 @@ import (
 )
 
 type model struct {
-	cfg    *types.Config
-	cursor int
+	model alphaModel
 }
 
-func New(cfg *types.Config) *model {
+func New(cfg *types.ProviderDetails) *model {
 	return &model{
-		cfg: cfg,
+		model: alphaModel{
+			settingCursor: 0,
+			mainCursor:    0,
+			focus:         MainFocus,
+			cfg:           cfg,
+		},
 	}
 }
 

@@ -36,7 +36,7 @@ func New() model {
 	}
 
 	databentoModel := databento.New(config.Provider.Databento)
-	alphaModel := alpha.New(config)
+	alphaModel := alpha.New(config.Provider.Alpha)
 
 	availableProviders := map[string]tea.Model{
 		"databento": databentoModel,

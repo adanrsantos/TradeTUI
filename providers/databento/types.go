@@ -5,13 +5,33 @@ import "github.com/adanrsantos/TradeTUI/types"
 type databentoModel struct {
 	settingCursor int
 	mainCursor    int
-	focus         focus
+	screen        Screen
+	focus         Focus
 	cfg           *types.ProviderDetails
 }
 
-type focus int
+type Focus int
 
 const (
-	MainFocus focus = iota
+	MainFocus Focus = iota
 	SettingFocus
 )
+
+type Screen int
+
+const (
+	MainMenuScreen Screen = iota
+	HistoricalScreen
+	LiveScreen
+	TestDataScreen
+	SymbolScreen
+	SchemaScreen
+	StartScreen
+	EndScreen
+	LimitScreen
+)
+
+type MenuItem struct {
+	Label  string
+	Target Screen
+}
