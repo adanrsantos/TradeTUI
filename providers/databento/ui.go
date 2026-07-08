@@ -45,7 +45,7 @@ func RenderMenu(items []MenuItem, cursor int) string {
 	return s.String()
 }
 
-func MainMenu(m databentoModel) string {
+func MainMenu(m model) string {
 	style := MainStyle
 
 	if m.focus == MainFocus {
@@ -63,7 +63,7 @@ func MainMenu(m databentoModel) string {
 	return style.Render(RenderMenu(items, m.mainCursor))
 }
 
-func SettingButton(m databentoModel) string {
+func SettingButton(m model) string {
 	style := MainStyle
 
 	if m.focus == SettingFocus {
