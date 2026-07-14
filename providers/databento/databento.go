@@ -56,15 +56,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch m.screen {
 				case MainMenuScreen:
 					m.screen = Menu[m.mainCursor].Target
+				case HistMenuScreen:
+					m.screen = HistoricalMenu[m.mainCursor].Target
 				}
 			case SettingFocus:
 			}
 			m.mainCursor = 0
 		case "h", "backspace":
 			switch m.screen {
-			case HistoricalScreen, LiveScreen, TestDataScreen:
+			case HistMenuScreen, LiveMenuScreen:
 				m.mainCursor = 0
 				m.screen = MainMenuScreen
+			case HistSymbol, HistSchema, HistStart, HistEnd, HistLimit, LiveSymbol, LiveSchema:
+				if parent, ok := Parent[m.screen]; ok {
+					m.screen = parent
+				}
 			}
 		case "j", "down":
 			switch m.screen {
@@ -72,12 +78,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.mainCursor < len(Menu)-1 {
 					m.mainCursor++
 				}
-			case HistoricalScreen:
+			case HistMenuScreen:
 				if m.mainCursor < len(HistoricalMenu)-1 {
 					m.mainCursor++
 				}
-			case LiveScreen:
-			case TestDataScreen:
+			case LiveMenuScreen:
+				if m.mainCursor < len(LiveMenu)-1 {
+					m.mainCursor++
+				}
 			}
 		case "k", "up":
 			switch m.screen {
@@ -85,12 +93,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.mainCursor > 0 {
 					m.mainCursor--
 				}
-			case HistoricalScreen:
+			case HistMenuScreen:
 				if m.mainCursor > 0 {
 					m.mainCursor--
 				}
-			case LiveScreen:
-			case TestDataScreen:
+			case LiveMenuScreen:
+				if m.mainCursor > 0 {
+					m.mainCursor--
+				}
 			}
 		}
 	}

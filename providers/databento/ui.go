@@ -4,18 +4,36 @@ import (
 	"strings"
 )
 
+var Parent = map[Screen]Screen{
+	HistMenuScreen: MainMenuScreen,
+	LiveMenuScreen: MainMenuScreen,
+
+	HistSymbol: HistMenuScreen,
+	HistSchema: HistMenuScreen,
+	HistStart:  HistMenuScreen,
+	HistEnd:    HistMenuScreen,
+	HistLimit:  HistMenuScreen,
+
+	LiveSymbol: LiveMenuScreen,
+	LiveSchema: LiveSchema,
+}
+
 var Menu = []MenuItem{
-	{Label: "Historical", Target: HistoricalScreen},
-	{Label: "Live", Target: LiveScreen},
-	{Label: "Test Data", Target: TestDataScreen},
+	{Label: "Historical", Target: HistMenuScreen},
+	{Label: "Live", Target: LiveMenuScreen},
 }
 
 var HistoricalMenu = []MenuItem{
-	{Label: "Symbol", Target: SymbolScreen},
-	{Label: "Schema", Target: SchemaScreen},
-	{Label: "Start", Target: StartScreen},
-	{Label: "End", Target: EndScreen},
-	{Label: "Limit", Target: LimitScreen},
+	{Label: "Symbol", Target: HistSymbol},
+	{Label: "Schema", Target: HistSchema},
+	{Label: "Start", Target: HistStart},
+	{Label: "End", Target: HistEnd},
+	{Label: "Limit", Target: HistLimit},
+}
+
+var LiveMenu = []MenuItem{
+	{Label: "Symbol", Target: LiveSymbol},
+	{Label: "Schema", Target: LiveSchema},
 }
 
 var Schema = []MenuItem{
@@ -56,8 +74,10 @@ func MainMenu(m model) string {
 	switch m.screen {
 	case MainMenuScreen:
 		items = Menu
-	case HistoricalScreen:
+	case HistMenuScreen:
 		items = HistoricalMenu
+	case LiveMenuScreen:
+		items = LiveMenu
 	}
 
 	return style.Render(RenderMenu(items, m.mainCursor))

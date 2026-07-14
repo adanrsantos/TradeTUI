@@ -11,14 +11,17 @@ type Screen int
 
 const (
 	MainMenuScreen Screen = iota
-	HistoricalScreen
-	LiveScreen
-	TestDataScreen
-	SymbolScreen
-	SchemaScreen
-	StartScreen
-	EndScreen
-	LimitScreen
+
+	HistMenuScreen
+	HistSymbol
+	HistSchema
+	HistStart
+	HistEnd
+	HistLimit
+
+	LiveMenuScreen
+	LiveSymbol
+	LiveSchema
 )
 
 type MenuItem struct {
