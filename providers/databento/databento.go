@@ -9,6 +9,7 @@ import (
 type model struct {
 	settingCursor int
 	mainCursor    int
+	query         Query
 	screen        Screen
 	focus         Focus
 	cfg           *types.ProviderDetails
@@ -86,18 +87,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.mainCursor < len(LiveMenu)-1 {
 					m.mainCursor++
 				}
+			case HistSymbol:
+				if m.mainCursor < len(SymbolChoices)-1 {
+					m.mainCursor++
+				}
+			case HistSchema:
+				if m.mainCursor < len(SchemaChoices)-1 {
+					m.mainCursor++
+				}
 			}
 		case "k", "up":
 			switch m.screen {
-			case MainMenuScreen:
-				if m.mainCursor > 0 {
-					m.mainCursor--
-				}
-			case HistMenuScreen:
-				if m.mainCursor > 0 {
-					m.mainCursor--
-				}
-			case LiveMenuScreen:
+			case MainMenuScreen, HistMenuScreen, LiveMenuScreen, HistSymbol, HistSchema:
 				if m.mainCursor > 0 {
 					m.mainCursor--
 				}

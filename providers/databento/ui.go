@@ -36,11 +36,26 @@ var LiveMenu = []MenuItem{
 	{Label: "Schema", Target: LiveSchema},
 }
 
-var Schema = []MenuItem{
+var SchemaChoices = []MenuItem{
 	{Label: "ohlcv-1s"},
 	{Label: "ohlcv-1m"},
 	{Label: "ohlcv-1h"},
 	{Label: "ohlcv-1d"},
+}
+
+var TimeFrameChoices = []MenuItem{
+	{Label: string(OneSecond)},
+	{Label: string(OneMinute)},
+	{Label: string(FifteenMinute)},
+	{Label: string(OneHour)},
+	{Label: string(FourHour)},
+	{Label: string(Daily)},
+}
+
+var SymbolChoices = []MenuItem{
+	{Label: string(NQ)},
+	{Label: string(ES)},
+	{Label: string(YM)},
 }
 
 func RenderMenu(items []MenuItem, cursor int) string {
@@ -78,6 +93,10 @@ func MainMenu(m model) string {
 		items = HistoricalMenu
 	case LiveMenuScreen:
 		items = LiveMenu
+	case HistSymbol, LiveSymbol:
+		items = SymbolChoices
+	case HistSchema, LiveSchema:
+		items = SchemaChoices
 	}
 
 	return style.Render(RenderMenu(items, m.mainCursor))
