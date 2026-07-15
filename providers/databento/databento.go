@@ -113,7 +113,7 @@ func (m model) View() tea.View {
 	return tea.NewView(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			MainMenu(m),
+			MainPanel(m),
 			SettingButton(m),
 		),
 	)

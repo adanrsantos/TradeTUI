@@ -1,6 +1,8 @@
 package databento
 
 import (
+	"charm.land/lipgloss/v2"
+	"fmt"
 	"strings"
 )
 
@@ -78,12 +80,24 @@ func RenderMenu(items []MenuItem, cursor int) string {
 	return s.String()
 }
 
-func MainMenu(m model) string {
+func MainPanel(m model) string {
 	style := MainStyle
 
 	if m.focus == MainFocus {
 		style = FocusStyle
 	}
+
+	return style.Render(
+		lipgloss.JoinHorizontal(
+			lipgloss.Left,
+			MainMenu(m),
+			QueryView(m),
+		),
+	)
+}
+
+func MainMenu(m model) string {
+	style := MainStyle
 
 	var items []MenuItem
 	switch m.screen {
@@ -100,6 +114,25 @@ func MainMenu(m model) string {
 	}
 
 	return style.Render(RenderMenu(items, m.mainCursor))
+}
+
+func QueryView(m model) string {
+	style := MainStyle
+
+	info := fmt.Sprintf(
+		"TimeFrame: %s\n"+
+			"Symbol: %s\n"+
+			"Start: %s\n"+
+			"End: %s\n"+
+			"Limit: %d\n",
+		m.query.TimeFrame,
+		m.query.Symbol,
+		m.query.StartDate,
+		m.query.EndDate,
+		m.query.Limit,
+	)
+
+	return style.Render(info)
 }
 
 func SettingButton(m model) string {
