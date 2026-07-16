@@ -9,7 +9,7 @@ type model struct {
 	model alphaModel
 }
 
-func New(cfg *types.ProviderDetails) *model {
+func New(cfg *types.ProviderDetails, secret string) *model {
 	return &model{
 		model: alphaModel{
 			settingCursor: 0,

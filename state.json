@@ -5,9 +5,7 @@
   "current_provider": "databento"
  },
  "Provider": {
-  "databento": {
-   "api_key": "hello"
-  },
+  "databento": {},
   "alpha": {}
  }
 }

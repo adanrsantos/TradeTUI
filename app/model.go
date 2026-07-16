@@ -35,8 +35,13 @@ func New() model {
 		config.Provider.Alpha = &types.ProviderDetails{}
 	}
 
-	databentoModel := databento.New(config.Provider.Databento)
-	alphaModel := alpha.New(config.Provider.Alpha)
+	secrets, err := loadSecret()
+	if err != nil {
+		log.Fatal("Could not load .env file:", err)
+	}
+
+	databentoModel := databento.New(config.Provider.Databento, secrets.DatabentoAPIKey)
+	alphaModel := alpha.New(config.Provider.Alpha, secrets.AlphaAPIKey)
 
 	availableProviders := map[string]tea.Model{
 		"databento": databentoModel,

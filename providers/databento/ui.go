@@ -38,26 +38,17 @@ var LiveMenu = []MenuItem{
 	{Label: "Schema", Target: LiveSchema},
 }
 
-var SchemaChoices = []MenuItem{
-	{Label: "ohlcv-1s"},
-	{Label: "ohlcv-1m"},
-	{Label: "ohlcv-1h"},
-	{Label: "ohlcv-1d"},
-}
-
-var TimeFrameChoices = []MenuItem{
-	{Label: string(OneSecond)},
-	{Label: string(OneMinute)},
-	{Label: string(FifteenMinute)},
-	{Label: string(OneHour)},
-	{Label: string(FourHour)},
-	{Label: string(Daily)},
-}
-
 var SymbolChoices = []MenuItem{
 	{Label: string(NQ)},
 	{Label: string(ES)},
 	{Label: string(YM)},
+}
+
+var SchemaChoices = []MenuItem{
+	{Label: string(OneSecond)},
+	{Label: string(OneMinute)},
+	{Label: string(OneHour)},
+	{Label: string(Daily)},
 }
 
 func RenderMenu(items []MenuItem, cursor int) string {
@@ -120,13 +111,13 @@ func QueryView(m model) string {
 	style := MainStyle
 
 	info := fmt.Sprintf(
-		"TimeFrame: %s\n"+
-			"Symbol: %s\n"+
+		"Symbol: %s\n"+
+			"Schema: %s\n"+
 			"Start: %s\n"+
 			"End: %s\n"+
 			"Limit: %d\n",
-		m.query.TimeFrame,
 		m.query.Symbol,
+		m.query.Schema,
 		m.query.StartDate,
 		m.query.EndDate,
 		m.query.Limit,

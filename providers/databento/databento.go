@@ -13,15 +13,17 @@ type model struct {
 	screen        Screen
 	focus         Focus
 	cfg           *types.ProviderDetails
+	secret        string
 }
 
-func New(cfg *types.ProviderDetails) *model {
+func New(cfg *types.ProviderDetails, secret string) *model {
 	return &model{
 		settingCursor: 0,
 		mainCursor:    0,
 		screen:        MainMenuScreen,
 		focus:         MainFocus,
 		cfg:           cfg,
+		secret:        secret,
 	}
 }
 
@@ -34,7 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "/":
+		/* case "/":
 			m.cfg.APIKey = "hello"
 			return m, func() tea.Msg {
 				return types.SaveConfigMsg{}
@@ -44,6 +46,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, func() tea.Msg {
 				return types.SaveConfigMsg{}
 			}
+		*/
 		case "tab":
 			m.mainCursor = 0
 			if m.focus == MainFocus {
@@ -59,6 +62,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.screen = Menu[m.mainCursor].Target
 				case HistMenuScreen:
 					m.screen = HistoricalMenu[m.mainCursor].Target
+				case HistSymbol:
+					m.query.Symbol = Symbol(SymbolChoices[m.mainCursor].Label)
+					if parent, ok := Parent[m.screen]; ok {
+						m.screen = parent
+					}
+				case HistSchema:
+					m.query.Schema = Schema(SchemaChoices[m.mainCursor].Label)
+					if parent, ok := Parent[m.screen]; ok {
+						m.screen = parent
+					}
 				}
 			case SettingFocus:
 			}

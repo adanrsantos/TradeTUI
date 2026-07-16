@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/adanrsantos/TradeTUI/types"
+	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
 )
@@ -59,4 +60,18 @@ func saveConfig(path string, config *types.Config) error {
 	}
 
 	return nil
+}
+
+func loadSecret() (*types.Secrets, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	secrets := &types.Secrets{
+		AlphaAPIKey:     os.Getenv("ALPHA_API_KEY"),
+		DatabentoAPIKey: os.Getenv("DATABENTO_API_KEY"),
+	}
+
+	return secrets, nil
 }

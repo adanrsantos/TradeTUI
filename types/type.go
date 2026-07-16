@@ -22,7 +22,6 @@ const (
 type SaveConfigMsg struct{}
 
 type ProviderDetails struct {
-	APIKey   string `json:"api_key,omitempty"`
 	Endpoint string `json:"endpoint,omitempty"`
 }
 

@@ -3,22 +3,20 @@ package databento
 import "time"
 
 type Query struct {
-	TimeFrame TimeFrame
 	Symbol    Symbol
+	Schema    Schema
 	StartDate time.Time
 	EndDate   time.Time
 	Limit     int
 }
 
-type TimeFrame string
+type Schema string
 
 const (
-	OneSecond     TimeFrame = "1sec"
-	OneMinute     TimeFrame = "1min"
-	FifteenMinute TimeFrame = "15min"
-	OneHour       TimeFrame = "1hour"
-	FourHour      TimeFrame = "4hour"
-	Daily         TimeFrame = "daily"
+	OneSecond Schema = "ohlcv-1s"
+	OneMinute Schema = "ohlcv-1m"
+	OneHour   Schema = "ohlcv-1h"
+	Daily     Schema = "ohlcv-1d"
 )
 
 type Symbol string
