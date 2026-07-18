@@ -6,8 +6,9 @@ import (
 )
 
 type DatabentoModel struct {
-	SettingCursor int
 	MainCursor    int
+	SubmitCursor  int
+	SettingCursor int
 	Query         Query
 	Screen        Screen
 	Focus         Focus
@@ -49,6 +50,7 @@ type Focus int
 
 const (
 	MainFocus Focus = iota
+	QuerySubmitFocus
 	SettingFocus
 )
 
@@ -56,8 +58,10 @@ type Screen int
 
 const (
 	MainMenuScreen Screen = iota
+	QuerySubmit
 
 	HistMenuScreen
+	HistDataset
 	HistSymbol
 	HistSchema
 	HistStart

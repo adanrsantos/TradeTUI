@@ -7,6 +7,18 @@ import (
 	"strings"
 )
 
+func DatasetChoices(datasets []types.Dataset) []types.MenuItem {
+	items := make([]types.MenuItem, len(datasets))
+
+	for i, dataset := range datasets {
+		items[i] = types.MenuItem{
+			Label: dataset.Display,
+		}
+	}
+
+	return items
+}
+
 func SchemaChoices(symbols []types.Schema) []types.MenuItem {
 	items := make([]types.MenuItem, len(symbols))
 
@@ -59,7 +71,7 @@ func MainPanel(m *types.DatabentoModel) string {
 	}
 
 	switch m.Screen {
-	case types.HistMenuScreen, types.HistSymbol, types.HistSchema, types.HistStart, types.HistEnd, types.HistLimit, types.LiveMenuScreen, types.LiveSymbol, types.LiveSchema:
+	case types.HistMenuScreen, types.HistDataset, types.HistSymbol, types.HistSchema, types.HistStart, types.HistEnd, types.HistLimit, types.LiveMenuScreen, types.LiveSymbol, types.LiveSchema:
 		return style.Render(
 			lipgloss.JoinHorizontal(
 				lipgloss.Left,
@@ -80,7 +92,20 @@ func MainMenu(m *types.DatabentoModel) string {
 	case types.MainMenuScreen:
 		items = Menu
 	case types.HistMenuScreen:
-		items = HistoricalMenu
+		return style.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Top,
+				RenderMenu(HistoricalMenu, m.MainCursor),
+				QuerySubmitView(m),
+			),
+		)
+	case types.HistDataset:
+		return style.Render(
+			RenderMenu(
+				DatasetChoices(Datasets),
+				m.MainCursor,
+			),
+		)
 	case types.LiveMenuScreen:
 		items = LiveMenu
 	case types.HistSymbol, types.LiveSymbol:
@@ -106,11 +131,13 @@ func QueryView(m *types.DatabentoModel) string {
 	style := MainStyle
 
 	info := fmt.Sprintf(
-		"Symbol: %s\n"+
+		"Dataset: %s\n"+
+			"Symbol: %s\n"+
 			"Schema: %s\n"+
 			"Start: %s\n"+
 			"End: %s\n"+
 			"Limit: %d\n",
+		m.Query.Dataset.Display,
 		m.Query.Symbol.Display,
 		m.Query.Schema.Display,
 		m.Query.StartDate,
@@ -119,6 +146,21 @@ func QueryView(m *types.DatabentoModel) string {
 	)
 
 	return style.Render(info)
+}
+
+func QuerySubmitView(m *types.DatabentoModel) string {
+	style := MainStyle
+
+	if m.Focus == types.QuerySubmitFocus {
+		style = FocusStyle
+	}
+
+	items := []types.MenuItem{
+		{Label: "Submit"},
+		{Label: "Reset"},
+	}
+
+	return style.Render(RenderMenu(items, m.SubmitCursor))
 }
 
 func SettingButton(m *types.DatabentoModel) string {

@@ -8,11 +8,12 @@ var Parent = map[types.Screen]types.Screen{
 	types.HistMenuScreen: types.MainMenuScreen,
 	types.LiveMenuScreen: types.MainMenuScreen,
 
-	types.HistSymbol: types.HistMenuScreen,
-	types.HistSchema: types.HistMenuScreen,
-	types.HistStart:  types.HistMenuScreen,
-	types.HistEnd:    types.HistMenuScreen,
-	types.HistLimit:  types.HistMenuScreen,
+	types.HistDataset: types.HistMenuScreen,
+	types.HistSymbol:  types.HistMenuScreen,
+	types.HistSchema:  types.HistMenuScreen,
+	types.HistStart:   types.HistMenuScreen,
+	types.HistEnd:     types.HistMenuScreen,
+	types.HistLimit:   types.HistMenuScreen,
 
 	types.LiveSymbol: types.LiveMenuScreen,
 	types.LiveSchema: types.LiveSchema,
@@ -24,6 +25,7 @@ var Menu = []types.MenuItem{
 }
 
 var HistoricalMenu = []types.MenuItem{
+	{Label: "Dataset", Target: types.HistDataset},
 	{Label: "Symbol", Target: types.HistSymbol},
 	{Label: "Schema", Target: types.HistSchema},
 	{Label: "Start", Target: types.HistStart},

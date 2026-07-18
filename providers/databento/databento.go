@@ -3,6 +3,8 @@ package databento
 import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"fmt"
+	"github.com/adanrsantos/TradeTUI/providers/databento/api"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
 	"github.com/adanrsantos/TradeTUI/providers/databento/ui"
 	globalTypes "github.com/adanrsantos/TradeTUI/types"
@@ -49,6 +51,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Screen = ui.Menu[m.MainCursor].Target
 				case types.HistMenuScreen:
 					m.Screen = ui.HistoricalMenu[m.MainCursor].Target
+				case types.HistDataset:
+					m.Query.Dataset = ui.Datasets[m.MainCursor]
+					if parent, ok := ui.Parent[m.Screen]; ok {
+						m.Screen = parent
+					}
 				case types.HistSymbol:
 					m.Query.Symbol = ui.Symbols[m.MainCursor]
 					if parent, ok := ui.Parent[m.Screen]; ok {
@@ -58,6 +65,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Query.Schema = ui.Schemas[m.MainCursor]
 					if parent, ok := ui.Parent[m.Screen]; ok {
 						m.Screen = parent
+					}
+				case types.QuerySubmit:
+					err := api.FetchHistory()
+					if err != nil {
+						fmt.Println(err)
 					}
 				}
 			case types.SettingFocus:
