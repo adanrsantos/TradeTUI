@@ -3,117 +3,105 @@ package databento
 import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/adanrsantos/TradeTUI/types"
+	"github.com/adanrsantos/TradeTUI/providers/databento/types"
+	"github.com/adanrsantos/TradeTUI/providers/databento/ui"
+	globalTypes "github.com/adanrsantos/TradeTUI/types"
 )
 
-type model struct {
-	settingCursor int
-	mainCursor    int
-	query         Query
-	screen        Screen
-	focus         Focus
-	cfg           *types.ProviderDetails
-	secret        string
+type Model struct {
+	*types.DatabentoModel
 }
 
-func New(cfg *types.ProviderDetails, secret string) *model {
-	return &model{
-		settingCursor: 0,
-		mainCursor:    0,
-		screen:        MainMenuScreen,
-		focus:         MainFocus,
-		cfg:           cfg,
-		secret:        secret,
+func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
+	return &Model{
+		DatabentoModel: &types.DatabentoModel{
+			SettingCursor: 0,
+			MainCursor:    0,
+			Screen:        types.MainMenuScreen,
+			Focus:         types.MainFocus,
+			Cfg:           cfg,
+			Secret:        secret,
+		},
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		/* case "/":
-			m.cfg.APIKey = "hello"
-			return m, func() tea.Msg {
-				return types.SaveConfigMsg{}
-			}
-		case ".":
-			m.cfg.APIKey = "bye"
-			return m, func() tea.Msg {
-				return types.SaveConfigMsg{}
-			}
-		*/
 		case "tab":
-			m.mainCursor = 0
-			if m.focus == MainFocus {
-				m.focus = SettingFocus
+			m.MainCursor = 0
+			if m.Focus == types.MainFocus {
+				m.Focus = types.SettingFocus
 			} else {
-				m.focus = MainFocus
+				m.Focus = types.MainFocus
 			}
 		case "enter":
-			switch m.focus {
-			case MainFocus:
-				switch m.screen {
-				case MainMenuScreen:
-					m.screen = Menu[m.mainCursor].Target
-				case HistMenuScreen:
-					m.screen = HistoricalMenu[m.mainCursor].Target
-				case HistSymbol:
-					m.query.Symbol = Symbol(SymbolChoices[m.mainCursor].Label)
-					if parent, ok := Parent[m.screen]; ok {
-						m.screen = parent
+			switch m.Focus {
+			case types.MainFocus:
+				switch m.Screen {
+				case types.MainMenuScreen:
+					m.Screen = ui.Menu[m.MainCursor].Target
+				case types.HistMenuScreen:
+					m.Screen = ui.HistoricalMenu[m.MainCursor].Target
+				case types.HistSymbol:
+					m.Query.Symbol = ui.Symbols[m.MainCursor]
+					if parent, ok := ui.Parent[m.Screen]; ok {
+						m.Screen = parent
 					}
-				case HistSchema:
-					m.query.Schema = Schema(SchemaChoices[m.mainCursor].Label)
-					if parent, ok := Parent[m.screen]; ok {
-						m.screen = parent
+				case types.HistSchema:
+					m.Query.Schema = ui.Schemas[m.MainCursor]
+					if parent, ok := ui.Parent[m.Screen]; ok {
+						m.Screen = parent
 					}
 				}
-			case SettingFocus:
+			case types.SettingFocus:
 			}
-			m.mainCursor = 0
+			m.MainCursor = 0
 		case "h", "backspace":
-			switch m.screen {
-			case HistMenuScreen, LiveMenuScreen:
-				m.mainCursor = 0
-				m.screen = MainMenuScreen
-			case HistSymbol, HistSchema, HistStart, HistEnd, HistLimit, LiveSymbol, LiveSchema:
-				if parent, ok := Parent[m.screen]; ok {
-					m.screen = parent
+			switch m.Screen {
+			case types.HistMenuScreen, types.LiveMenuScreen:
+				m.MainCursor = 0
+				m.Query = types.Query{}
+				m.Screen = types.MainMenuScreen
+			case types.HistSymbol, types.HistSchema, types.HistStart, types.HistEnd, types.HistLimit, types.LiveSymbol, types.LiveSchema:
+				if parent, ok := ui.Parent[m.Screen]; ok {
+					m.Screen = parent
 				}
 			}
 		case "j", "down":
-			switch m.screen {
-			case MainMenuScreen:
-				if m.mainCursor < len(Menu)-1 {
-					m.mainCursor++
+			switch m.Screen {
+			case types.MainMenuScreen:
+				if m.MainCursor < len(ui.Menu)-1 {
+					m.MainCursor++
 				}
-			case HistMenuScreen:
-				if m.mainCursor < len(HistoricalMenu)-1 {
-					m.mainCursor++
+			case types.HistMenuScreen:
+				if m.MainCursor < len(ui.HistoricalMenu)-1 {
+					m.MainCursor++
 				}
-			case LiveMenuScreen:
-				if m.mainCursor < len(LiveMenu)-1 {
-					m.mainCursor++
+			case types.LiveMenuScreen:
+				if m.MainCursor < len(ui.LiveMenu)-1 {
+					m.MainCursor++
 				}
-			case HistSymbol:
-				if m.mainCursor < len(SymbolChoices)-1 {
-					m.mainCursor++
+			case types.HistSymbol:
+				if m.MainCursor < len(ui.Symbols)-1 {
+					m.MainCursor++
 				}
-			case HistSchema:
-				if m.mainCursor < len(SchemaChoices)-1 {
-					m.mainCursor++
+			case types.HistSchema:
+				if m.MainCursor < len(ui.Schemas)-1 {
+					m.MainCursor++
 				}
 			}
 		case "k", "up":
-			switch m.screen {
-			case MainMenuScreen, HistMenuScreen, LiveMenuScreen, HistSymbol, HistSchema:
-				if m.mainCursor > 0 {
-					m.mainCursor--
+			switch m.Screen {
+			case types.MainMenuScreen, types.HistMenuScreen, types.LiveMenuScreen, types.HistSymbol, types.HistSchema:
+				if m.MainCursor > 0 {
+					m.MainCursor--
 				}
 			}
 		}
@@ -122,12 +110,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() tea.View {
+func (m Model) View() tea.View {
 	return tea.NewView(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			MainPanel(m),
-			SettingButton(m),
+			ui.MainPanel(m.DatabentoModel),
+			ui.SettingButton(m.DatabentoModel),
 		),
 	)
 }

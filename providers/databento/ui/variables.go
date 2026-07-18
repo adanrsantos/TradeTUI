@@ -1,0 +1,92 @@
+package ui
+
+import (
+	"github.com/adanrsantos/TradeTUI/providers/databento/types"
+)
+
+var Parent = map[types.Screen]types.Screen{
+	types.HistMenuScreen: types.MainMenuScreen,
+	types.LiveMenuScreen: types.MainMenuScreen,
+
+	types.HistSymbol: types.HistMenuScreen,
+	types.HistSchema: types.HistMenuScreen,
+	types.HistStart:  types.HistMenuScreen,
+	types.HistEnd:    types.HistMenuScreen,
+	types.HistLimit:  types.HistMenuScreen,
+
+	types.LiveSymbol: types.LiveMenuScreen,
+	types.LiveSchema: types.LiveSchema,
+}
+
+var Menu = []types.MenuItem{
+	{Label: "Historical", Target: types.HistMenuScreen},
+	{Label: "Live", Target: types.LiveMenuScreen},
+}
+
+var HistoricalMenu = []types.MenuItem{
+	{Label: "Symbol", Target: types.HistSymbol},
+	{Label: "Schema", Target: types.HistSchema},
+	{Label: "Start", Target: types.HistStart},
+	{Label: "End", Target: types.HistEnd},
+	{Label: "Limit", Target: types.HistLimit},
+}
+
+var LiveMenu = []types.MenuItem{
+	{Label: "Symbol", Target: types.LiveSymbol},
+	{Label: "Schema", Target: types.LiveSchema},
+}
+
+var Datasets = []types.Dataset{
+	{
+		Display: "CME Globex MDP 3.0",
+		Value:   "GLBX.MDP3",
+		Symbols: []types.Symbol{
+			{
+				Display: "E-mini Nasdaq-100(NQ)",
+				Value:   "NQ",
+			},
+			{
+				Display: "E-mini S&P 500 (ES)",
+				Value:   "ES",
+			},
+			{
+				Display: "E-mini Dow Jones (YM)",
+				Value:   "YM",
+			},
+		},
+	},
+}
+
+var Symbols = []types.Symbol{
+	{
+		Display: "E-mini Nasdaq-100 (NQ)",
+		Value:   "NQ",
+	},
+	{
+		Display: "E-mini S&P 500 (ES)",
+		Value:   "ES",
+	},
+	{
+		Display: "E-mini Dow Jones (YM)",
+		Value:   "YM",
+	},
+}
+
+var Schemas = []types.Schema{
+	{
+		Display: "1 second (ohlcv-1s)",
+		Value:   "ohlcv-1s",
+	},
+	{
+		Display: "1 minute (ohlcv-1m)",
+		Value:   "ohlcv-1s",
+	},
+	{
+		Display: "1 hour (ohlcv-1h)",
+		Value:   "ohlcv-1s",
+	},
+	{
+		Display: "daily (ohlcv-1d)",
+		Value:   "ohlcv-1s",
+	},
+}

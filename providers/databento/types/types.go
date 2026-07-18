@@ -1,0 +1,70 @@
+package types
+
+import (
+	"github.com/adanrsantos/TradeTUI/types"
+	"time"
+)
+
+type DatabentoModel struct {
+	SettingCursor int
+	MainCursor    int
+	Query         Query
+	Screen        Screen
+	Focus         Focus
+	Cfg           *types.ProviderDetails
+	Secret        string
+}
+
+type Query struct {
+	Dataset   Dataset
+	Symbol    Symbol
+	Schema    Schema
+	StartDate time.Time
+	EndDate   time.Time
+	Limit     int
+}
+
+type Dataset struct {
+	Display string
+	Value   string
+	Symbols []Symbol
+}
+
+type Symbol struct {
+	Display string
+	Value   string
+}
+
+type Schema struct {
+	Display string
+	Value   string
+}
+
+type MenuItem struct {
+	Label  string
+	Target Screen
+}
+
+type Focus int
+
+const (
+	MainFocus Focus = iota
+	SettingFocus
+)
+
+type Screen int
+
+const (
+	MainMenuScreen Screen = iota
+
+	HistMenuScreen
+	HistSymbol
+	HistSchema
+	HistStart
+	HistEnd
+	HistLimit
+
+	LiveMenuScreen
+	LiveSymbol
+	LiveSchema
+)
