@@ -92,3 +92,8 @@ var Schemas = []types.Schema{
 		Value:   "ohlcv-1s",
 	},
 }
+
+var SubmitChoices = []types.MenuItem{
+	{Label: "Submit"},
+	{Label: "Reset"},
+}

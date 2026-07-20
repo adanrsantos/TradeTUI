@@ -38,9 +38,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "tab":
 			m.MainCursor = 0
-			if m.Focus == types.MainFocus {
-				m.Focus = types.SettingFocus
-			} else {
+			switch m.Focus {
+			case types.MainFocus:
+				switch m.Screen {
+				case types.MainMenuScreen:
+					m.Focus = types.SettingFocus
+				case types.HistMenuScreen:
+					m.Focus = types.QuerySubmitFocus
+				}
+			case types.QuerySubmitFocus:
+				m.Focus = types.MainFocus
+			case types.SettingFocus:
 				m.Focus = types.MainFocus
 			}
 		case "enter":
@@ -66,15 +74,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if parent, ok := ui.Parent[m.Screen]; ok {
 						m.Screen = parent
 					}
-				case types.QuerySubmit:
-					err := api.FetchHistory()
+				}
+			case types.QuerySubmitFocus:
+				if m.SubmitCursor == 0 {
+					err := api.FetchHistory(m.Query)
 					if err != nil {
 						fmt.Println(err)
 					}
+				} else {
+					m.Query = types.Query{}
+					m.Focus = types.MainFocus
 				}
 			case types.SettingFocus:
 			}
 			m.MainCursor = 0
+			m.SubmitCursor = 0
 		case "h", "backspace":
 			switch m.Screen {
 			case types.HistMenuScreen, types.LiveMenuScreen:
@@ -87,33 +101,47 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "j", "down":
-			switch m.Screen {
-			case types.MainMenuScreen:
-				if m.MainCursor < len(ui.Menu)-1 {
-					m.MainCursor++
+			switch m.Focus {
+			case types.MainFocus:
+				switch m.Screen {
+				case types.MainMenuScreen:
+					if m.MainCursor < len(ui.Menu)-1 {
+						m.MainCursor++
+					}
+				case types.HistMenuScreen:
+					if m.MainCursor < len(ui.HistoricalMenu)-1 {
+						m.MainCursor++
+					}
+				case types.LiveMenuScreen:
+					if m.MainCursor < len(ui.LiveMenu)-1 {
+						m.MainCursor++
+					}
+				case types.HistSymbol:
+					if m.MainCursor < len(ui.Symbols)-1 {
+						m.MainCursor++
+					}
+				case types.HistSchema:
+					if m.MainCursor < len(ui.Schemas)-1 {
+						m.MainCursor++
+					}
 				}
-			case types.HistMenuScreen:
-				if m.MainCursor < len(ui.HistoricalMenu)-1 {
-					m.MainCursor++
-				}
-			case types.LiveMenuScreen:
-				if m.MainCursor < len(ui.LiveMenu)-1 {
-					m.MainCursor++
-				}
-			case types.HistSymbol:
-				if m.MainCursor < len(ui.Symbols)-1 {
-					m.MainCursor++
-				}
-			case types.HistSchema:
-				if m.MainCursor < len(ui.Schemas)-1 {
-					m.MainCursor++
+			case types.QuerySubmitFocus:
+				if m.SubmitCursor < len(ui.SubmitChoices)-1 {
+					m.SubmitCursor++
 				}
 			}
 		case "k", "up":
-			switch m.Screen {
-			case types.MainMenuScreen, types.HistMenuScreen, types.LiveMenuScreen, types.HistSymbol, types.HistSchema:
-				if m.MainCursor > 0 {
-					m.MainCursor--
+			switch m.Focus {
+			case types.MainFocus:
+				switch m.Screen {
+				case types.MainMenuScreen, types.HistMenuScreen, types.LiveMenuScreen, types.HistSymbol, types.HistSchema:
+					if m.MainCursor > 0 {
+						m.MainCursor--
+					}
+				}
+			case types.QuerySubmitFocus:
+				if m.SubmitCursor > 0 {
+					m.SubmitCursor--
 				}
 			}
 		}

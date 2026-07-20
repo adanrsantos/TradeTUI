@@ -58,7 +58,6 @@ type Screen int
 
 const (
 	MainMenuScreen Screen = iota
-	QuerySubmit
 
 	HistMenuScreen
 	HistDataset

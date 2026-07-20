@@ -155,12 +155,7 @@ func QuerySubmitView(m *types.DatabentoModel) string {
 		style = FocusStyle
 	}
 
-	items := []types.MenuItem{
-		{Label: "Submit"},
-		{Label: "Reset"},
-	}
-
-	return style.Render(RenderMenu(items, m.SubmitCursor))
+	return style.Render(RenderMenu(SubmitChoices, m.SubmitCursor))
 }
 
 func SettingButton(m *types.DatabentoModel) string {
