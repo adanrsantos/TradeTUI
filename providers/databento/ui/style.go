@@ -3,7 +3,7 @@ package ui
 import "charm.land/lipgloss/v2"
 
 var (
-	DashboardStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder())
+	DashboardStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder()).PaddingLeft(1).PaddingRight(1)
 	MainStyle      = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder())
 	FocusStyle     = MainStyle.BorderForeground(lipgloss.Color("228"))
 

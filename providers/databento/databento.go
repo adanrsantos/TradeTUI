@@ -37,20 +37,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "tab":
-			m.MainCursor = 0
-			switch m.Focus {
-			case types.MainFocus:
-				switch m.Screen {
-				case types.MainMenuScreen:
-					m.Focus = types.SettingFocus
-				case types.HistMenuScreen:
-					m.Focus = types.QuerySubmitFocus
-				}
-			case types.QuerySubmitFocus:
-				m.Focus = types.MainFocus
-			case types.SettingFocus:
-				m.Focus = types.MainFocus
-			}
 		case "enter":
 			switch m.Focus {
 			case types.MainFocus:

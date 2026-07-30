@@ -10,19 +10,13 @@ func Dashboard(m *types.DatabentoModel) string {
 	var s strings.Builder
 	style := DashboardStyle
 
-	s.WriteString(LabelStyle.Render("CurrentProvider: "))
-	s.WriteString(ValueStyle.Render("Databento"))
-	s.WriteString("\n")
-	s.WriteString(LabelStyle.Render("API_Key: "))
-	if m.Secret != "" {
-		s.WriteString(SuccessStyle.Render("Loaded "))
-	} else {
-		s.WriteString(ErrorStyle.Render("Missing ensure .env contains 'DATABENTO_API_KEY='"))
-	}
+	s.WriteString(Header(m.Secret))
 	s.WriteString("\n\n")
 	s.WriteString(MainMenu(m))
 	s.WriteString("\n\n")
 	s.WriteString(RecentActivity(m))
+	s.WriteString("\n\n")
+	s.WriteString(Keybinds())
 
 	return style.Render(s.String())
 }
@@ -40,11 +34,32 @@ func MainMenu(m *types.DatabentoModel) string {
 	return s.String()
 }
 
+func Header(secret string) string {
+	var s strings.Builder
+	s.WriteString(LabelStyle.Render("CurrentProvider: "))
+	s.WriteString(ValueStyle.Render("Databento"))
+	s.WriteString("\n")
+	s.WriteString(LabelStyle.Render("API_Key: "))
+	if secret != "" {
+		s.WriteString(SuccessStyle.Render("Loaded "))
+	} else {
+		s.WriteString(ErrorStyle.Render("Missing ensure .env contains 'DATABENTO_API_KEY='"))
+	}
+
+	return s.String()
+}
+
 func RecentActivity(m *types.DatabentoModel) string {
 	var s strings.Builder
 
 	s.WriteString(LabelStyle.Render("RecentActivity\n"))
 
+	return s.String()
+}
+
+func Keybinds() string {
+	var s strings.Builder
+	s.WriteString("Move: j/k or \u2191/\u2193\tSelect: enter\tBack: esc\nJump Pane: tab\tQuit: q or ctrl+c\tHelp: ?")
 	return s.String()
 }
 
