@@ -6,7 +6,9 @@ import (
 
 var Parent = map[types.Screen]types.Screen{
 	types.HistMenuScreen: types.MainMenuScreen,
-	types.LiveMenuScreen: types.MainMenuScreen,
+	types.StatScreen:     types.MainMenuScreen,
+	types.DownloadScreen: types.MainMenuScreen,
+	types.SettingScreen:  types.MainMenuScreen,
 
 	types.HistDataset: types.HistMenuScreen,
 	types.HistSymbol:  types.HistMenuScreen,
@@ -14,14 +16,13 @@ var Parent = map[types.Screen]types.Screen{
 	types.HistStart:   types.HistMenuScreen,
 	types.HistEnd:     types.HistMenuScreen,
 	types.HistLimit:   types.HistMenuScreen,
-
-	types.LiveSymbol: types.LiveMenuScreen,
-	types.LiveSchema: types.LiveSchema,
 }
 
 var Menu = []types.MenuItem{
 	{Label: "Historical", Target: types.HistMenuScreen},
-	{Label: "Live", Target: types.LiveMenuScreen},
+	{Label: "Statistics", Target: types.StatScreen},
+	{Label: "Downloads", Target: types.DownloadScreen},
+	{Label: "Settings", Target: types.SettingScreen},
 }
 
 var HistoricalMenu = []types.MenuItem{
@@ -31,11 +32,6 @@ var HistoricalMenu = []types.MenuItem{
 	{Label: "Start", Target: types.HistStart},
 	{Label: "End", Target: types.HistEnd},
 	{Label: "Limit", Target: types.HistLimit},
-}
-
-var LiveMenu = []types.MenuItem{
-	{Label: "Symbol", Target: types.LiveSymbol},
-	{Label: "Schema", Target: types.LiveSchema},
 }
 
 var Datasets = []types.Dataset{

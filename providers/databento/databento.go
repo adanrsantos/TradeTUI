@@ -91,11 +91,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.SubmitCursor = 0
 		case "h", "backspace":
 			switch m.Screen {
-			case types.HistMenuScreen, types.LiveMenuScreen:
+			case types.HistMenuScreen:
 				m.MainCursor = 0
 				m.Query = types.Query{}
 				m.Screen = types.MainMenuScreen
-			case types.HistSymbol, types.HistSchema, types.HistStart, types.HistEnd, types.HistLimit, types.LiveSymbol, types.LiveSchema:
+			case types.HistSymbol, types.HistSchema, types.HistStart, types.HistEnd, types.HistLimit:
 				if parent, ok := ui.Parent[m.Screen]; ok {
 					m.Screen = parent
 				}
@@ -110,10 +110,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				case types.HistMenuScreen:
 					if m.MainCursor < len(ui.HistoricalMenu)-1 {
-						m.MainCursor++
-					}
-				case types.LiveMenuScreen:
-					if m.MainCursor < len(ui.LiveMenu)-1 {
 						m.MainCursor++
 					}
 				case types.HistSymbol:
@@ -134,7 +130,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch m.Focus {
 			case types.MainFocus:
 				switch m.Screen {
-				case types.MainMenuScreen, types.HistMenuScreen, types.LiveMenuScreen, types.HistSymbol, types.HistSchema:
+				case types.MainMenuScreen, types.HistMenuScreen, types.HistSymbol, types.HistSchema:
 					if m.MainCursor > 0 {
 						m.MainCursor--
 					}
@@ -154,8 +150,7 @@ func (m Model) View() tea.View {
 	return tea.NewView(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			ui.MainPanel(m.DatabentoModel),
-			ui.SettingButton(m.DatabentoModel),
+			ui.Dashboard(m.DatabentoModel),
 		),
 	)
 }

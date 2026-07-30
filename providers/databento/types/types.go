@@ -58,16 +58,15 @@ type Screen int
 
 const (
 	MainMenuScreen Screen = iota
-
 	HistMenuScreen
+	StatScreen
+	DownloadScreen
+	SettingScreen
+
 	HistDataset
 	HistSymbol
 	HistSchema
 	HistStart
 	HistEnd
 	HistLimit
-
-	LiveMenuScreen
-	LiveSymbol
-	LiveSchema
 )
