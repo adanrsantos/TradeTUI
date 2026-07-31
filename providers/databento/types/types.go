@@ -51,6 +51,7 @@ type Focus int
 const (
 	MainFocus Focus = iota
 	QuerySubmitFocus
+	SubmitFocus
 	SettingFocus
 )
 
@@ -69,4 +70,5 @@ const (
 	HistStart
 	HistEnd
 	HistLimit
+	HistRequest
 )

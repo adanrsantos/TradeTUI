@@ -34,6 +34,11 @@ var HistoricalMenu = []types.MenuItem{
 	{Label: "Limit", Target: types.HistLimit},
 }
 
+var SubmitChoices = []types.MenuItem{
+	{Label: "Submit"},
+	{Label: "Reset"},
+}
+
 var Datasets = []types.Dataset{
 	{
 		Display: "CME Globex MDP 3.0",
@@ -87,9 +92,4 @@ var Schemas = []types.Schema{
 		Display: "daily (ohlcv-1d)",
 		Value:   "ohlcv-1s",
 	},
-}
-
-var SubmitChoices = []types.MenuItem{
-	{Label: "Submit"},
-	{Label: "Reset"},
 }

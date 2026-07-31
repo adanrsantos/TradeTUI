@@ -1,7 +1,7 @@
 package ui
 
 import (
-	// "charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
 	"strings"
 )
@@ -28,7 +28,11 @@ func MainMenu(m *types.DatabentoModel) string {
 	case types.MainMenuScreen:
 		s.WriteString(PaddingStyle.Render(RenderMenu(Menu, m.MainCursor)))
 	case types.HistMenuScreen:
+		s.WriteString(LabelStyle.Render("Historical Request"))
+		s.WriteString("\n")
 		s.WriteString(PaddingStyle.Render(RenderMenu(HistoricalMenu, m.MainCursor)))
+		s.WriteString("\n")
+		s.WriteString(PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(SubmitChoices, m.SubmitCursor)))
 	}
 
 	return s.String()
@@ -67,16 +71,21 @@ func RenderMenu(items []types.MenuItem, cursor int) string {
 	var s strings.Builder
 
 	for i, item := range items {
-		if i == cursor {
-			s.WriteString("> ")
-			s.WriteString(HoverStyle.Render(item.Label))
-		} else {
+		if cursor == -1 {
 			s.WriteString(" ")
 			s.WriteString(item.Label)
+		} else {
+			if i == cursor {
+				s.WriteString("> ")
+				s.WriteString(HoverStyle.Render(item.Label))
+			} else {
+				s.WriteString(" ")
+				s.WriteString(item.Label)
+			}
 		}
 
 		if i < len(items)-1 {
-			s.WriteByte('\n')
+			s.WriteString("\n")
 		}
 	}
 

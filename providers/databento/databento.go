@@ -19,6 +19,7 @@ func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
 		DatabentoModel: &types.DatabentoModel{
 			SettingCursor: 0,
 			MainCursor:    0,
+			SubmitCursor:  -1,
 			Screen:        types.MainMenuScreen,
 			Focus:         types.MainFocus,
 			Cfg:           cfg,
