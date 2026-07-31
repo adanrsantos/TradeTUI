@@ -7,6 +7,7 @@ import (
 
 type DatabentoModel struct {
 	MainCursor    int
+	CursorStack   []int
 	SubmitCursor  int
 	SettingCursor int
 	Query         Query

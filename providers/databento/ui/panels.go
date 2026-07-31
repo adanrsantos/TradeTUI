@@ -33,6 +33,30 @@ func MainMenu(m *types.DatabentoModel) string {
 		s.WriteString(PaddingStyle.Render(RenderMenu(HistoricalMenu, m.MainCursor)))
 		s.WriteString("\n")
 		s.WriteString(PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(SubmitChoices, m.SubmitCursor)))
+	case types.HistDataset:
+		items := make([]types.MenuItem, len(Datasets))
+
+		for i, dataset := range Datasets {
+			items[i] = types.MenuItem{
+				Label: dataset.Display,
+			}
+		}
+
+		s.WriteString(LabelStyle.Render("Historical Request"))
+		s.WriteString("\n")
+		s.WriteString(PaddingStyle.Render(RenderMenu(items, m.MainCursor)))
+	case types.HistSymbol:
+		items := make([]types.MenuItem, len(Symbols))
+
+		for i, symbol := range Symbols {
+			items[i] = types.MenuItem{
+				Label: symbol.Display,
+			}
+		}
+
+		s.WriteString(LabelStyle.Render("Historical Request"))
+		s.WriteString("\n")
+		s.WriteString(PaddingStyle.Render(RenderMenu(items, m.MainCursor)))
 	}
 
 	return s.String()
@@ -63,7 +87,7 @@ func RecentActivity(m *types.DatabentoModel) string {
 
 func Keybinds() string {
 	var s strings.Builder
-	s.WriteString("Move: j/k or \u2191/\u2193\tSelect: enter\tBack: esc\nJump Pane: tab\tQuit: q or ctrl+c\tHelp: ?")
+	s.WriteString("Move: j/k or \u2191/\u2193\tSelect: l or enter\tBack: h or backspace\nJump: tab\tQuit: q or ctrl+c\tHelp: ?")
 	return s.String()
 }
 
