@@ -35,32 +35,19 @@ var HistoricalMenu = []types.MenuItem{
 }
 
 var SubmitChoices = []types.MenuItem{
-	{Label: "Submit"},
-	{Label: "Reset"},
+	{Label: "Submit", Action: types.SubmitAction},
+	{Label: "Reset", Action: types.ResetAction},
 }
 
 var Datasets = []types.Dataset{
 	{
 		Display: "CME Globex MDP 3.0",
 		Value:   "GLBX.MDP3",
-		Symbols: []types.Symbol{
-			{
-				Display: "E-mini Nasdaq-100(NQ)",
-				Value:   "NQ",
-			},
-			{
-				Display: "E-mini S&P 500 (ES)",
-				Value:   "ES",
-			},
-			{
-				Display: "E-mini Dow Jones (YM)",
-				Value:   "YM",
-			},
-		},
+		Symbols: FutureSymbols,
 	},
 }
 
-var Symbols = []types.Symbol{
+var FutureSymbols = []types.Symbol{
 	{
 		Display: "E-mini Nasdaq-100 (NQ)",
 		Value:   "NQ",

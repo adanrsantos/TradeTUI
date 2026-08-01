@@ -28,11 +28,11 @@ func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
 	}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
@@ -53,110 +53,51 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "l", "enter":
 			switch m.Screen {
 			case types.MainMenuScreen:
-				m.CursorStack = append(m.CursorStack, m.MainCursor)
-				m.Screen = ui.Menu[m.MainCursor].Target
-				m.MainCursor = 0
+				m.GoForward(ui.Menu)
 			case types.HistMenuScreen:
 				switch m.Focus {
 				case types.MainFocus:
-					m.CursorStack = append(m.CursorStack, m.MainCursor)
-					m.Screen = ui.HistoricalMenu[m.MainCursor].Target
-					m.MainCursor = 0
+					m.GoForward(ui.HistoricalMenu)
 				case types.SubmitFocus:
-					// api call logic
-					m.SubmitCursor = -1
-				}
-			case types.HistDataset:
-				last := len(m.CursorStack) - 1
-				m.MainCursor = m.CursorStack[last]
-				m.CursorStack = m.CursorStack[:last]
-				if parent, ok := ui.Parent[m.Screen]; ok {
-					m.Screen = parent
-				}
-			case types.HistSymbol:
-				last := len(m.CursorStack) - 1
-				m.MainCursor = m.CursorStack[last]
-				m.CursorStack = m.CursorStack[:last]
-				if parent, ok := ui.Parent[m.Screen]; ok {
-					m.Screen = parent
-				}
-			}
-			/*
-				switch m.Focus {
-				case types.MainFocus:
-					switch m.Screen {
-					case types.MainMenuScreen:
-						m.Screen = ui.Menu[m.MainCursor].Target
-					case types.HistMenuScreen:
-						m.Screen = ui.HistoricalMenu[m.MainCursor].Target
-					case types.HistDataset:
-						m.Query.Dataset = ui.Datasets[m.MainCursor]
-						if parent, ok := ui.Parent[m.Screen]; ok {
-							m.Screen = parent
-						}
-					case types.HistSymbol:
-						m.Query.Symbol = ui.Symbols[m.MainCursor]
-						if parent, ok := ui.Parent[m.Screen]; ok {
-							m.Screen = parent
-						}
-					case types.HistSchema:
-						m.Query.Schema = ui.Schemas[m.MainCursor]
-						if parent, ok := ui.Parent[m.Screen]; ok {
-							m.Screen = parent
-						}
-					}
-				case types.QuerySubmitFocus:
-					if m.SubmitCursor == 0 {
-						err := api.FetchHistory(m.Query)
-						if err != nil {
-							fmt.Println(err)
-						}
-					} else {
+					action := ui.SubmitChoices[m.SubmitCursor].Action
+
+					switch action {
+					case types.SubmitAction:
+						m.Screen = types.HistRequest
+						// call function
+					case types.ResetAction:
 						m.Query = types.Query{}
-						m.Focus = types.MainFocus
 					}
-				case types.SettingFocus:
+					m.Focus = types.MainFocus
+					m.MainCursor = 0
+					m.SubmitCursor = -1
+
 				}
-				m.MainCursor = 0
-				m.SubmitCursor = 0
-			*/
+			default:
+				m.GoBack()
+			}
 		case "h", "backspace":
 			switch m.Screen {
 			case types.HistMenuScreen:
 				m.SubmitCursor = -1
 				m.Query = types.Query{}
 			}
-			if parent, ok := ui.Parent[m.Screen]; ok {
-				last := len(m.CursorStack) - 1
-				m.MainCursor = m.CursorStack[last]
-				m.CursorStack = m.CursorStack[:last]
-				m.Screen = parent
-			}
+			m.GoBack()
 		case "j", "down":
 			switch m.Screen {
 			case types.MainMenuScreen:
-				if m.MainCursor < len(ui.Menu)-1 {
-					m.MainCursor++
-				}
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.Menu))
 			case types.HistMenuScreen:
 				switch m.Focus {
 				case types.MainFocus:
-					if m.MainCursor < len(ui.HistoricalMenu)-1 {
-						m.MainCursor++
-					}
+					m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.HistoricalMenu))
 				case types.SubmitFocus:
-					if m.SubmitCursor < len(ui.SubmitChoices)-1 {
-						m.SubmitCursor++
-					}
+					m.SubmitCursor = IncreaseCursor(m.SubmitCursor, len(ui.SubmitChoices))
 				}
 			case types.HistSymbol:
-				if m.MainCursor < len(ui.Symbols)-1 {
-					m.MainCursor++
-				}
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.FutureSymbols))
 			case types.HistSchema:
-				if m.MainCursor < len(ui.Schemas)-1 {
-					m.MainCursor++
-				}
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.Schemas))
 			case types.HistRequest:
 				// request screen logic
 			}
@@ -177,11 +118,43 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m Model) View() tea.View {
+func (m *Model) View() tea.View {
 	return tea.NewView(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
 			ui.Dashboard(m.DatabentoModel),
 		),
 	)
+}
+
+func (m *Model) GoBack() {
+	if parent, ok := ui.Parent[m.Screen]; ok {
+		m.Screen = parent
+	}
+
+	if len(m.CursorStack) == 0 {
+		return
+	}
+
+	if m.Focus == types.SubmitFocus {
+		m.Focus = types.MainFocus
+		m.SubmitCursor = -1
+	}
+
+	last := len(m.CursorStack) - 1
+	m.MainCursor = m.CursorStack[last]
+	m.CursorStack = m.CursorStack[:last]
+}
+
+func (m *Model) GoForward(menu []types.MenuItem) {
+	m.CursorStack = append(m.CursorStack, m.MainCursor)
+	m.Screen = menu[m.MainCursor].Target
+	m.MainCursor = 0
+}
+
+func IncreaseCursor(cursor int, max int) int {
+	if cursor < max-1 {
+		return cursor + 1
+	}
+	return cursor
 }

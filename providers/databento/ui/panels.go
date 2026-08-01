@@ -46,9 +46,9 @@ func MainMenu(m *types.DatabentoModel) string {
 		s.WriteString("\n")
 		s.WriteString(PaddingStyle.Render(RenderMenu(items, m.MainCursor)))
 	case types.HistSymbol:
-		items := make([]types.MenuItem, len(Symbols))
+		items := make([]types.MenuItem, len(FutureSymbols))
 
-		for i, symbol := range Symbols {
+		for i, symbol := range FutureSymbols {
 			items[i] = types.MenuItem{
 				Label: symbol.Display,
 			}

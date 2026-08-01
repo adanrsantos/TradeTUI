@@ -18,9 +18,9 @@ type DatabentoModel struct {
 }
 
 type Query struct {
-	Dataset   Dataset
-	Symbol    Symbol
-	Schema    Schema
+	Dataset   *Dataset
+	Symbol    *Symbol
+	Schema    *Schema
 	StartDate time.Time
 	EndDate   time.Time
 	Limit     int
@@ -45,7 +45,15 @@ type Schema struct {
 type MenuItem struct {
 	Label  string
 	Target Screen
+	Action Action
 }
+
+type Action int
+
+const (
+	SubmitAction Action = iota
+	ResetAction
+)
 
 type Focus int
 
