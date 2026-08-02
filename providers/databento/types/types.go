@@ -21,9 +21,9 @@ type Query struct {
 	Dataset   *Dataset
 	Symbol    *Symbol
 	Schema    *Schema
-	StartDate time.Time
-	EndDate   time.Time
-	Limit     int
+	StartDate *time.Time
+	EndDate   *time.Time
+	Limit     *int
 }
 
 type Dataset struct {
@@ -45,8 +45,20 @@ type Schema struct {
 type MenuItem struct {
 	Label  string
 	Target Screen
+	Field  QueryField
 	Action Action
 }
+
+type QueryField int
+
+const (
+	DatasetField QueryField = iota
+	SymbolField
+	SchemaField
+	StartField
+	EndField
+	LimitField
+)
 
 type Action int
 

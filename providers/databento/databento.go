@@ -57,6 +57,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case types.HistMenuScreen:
 				switch m.Focus {
 				case types.MainFocus:
+					if m.MainCursor == int(types.SymbolField) && m.Query.Dataset == nil {
+						return m, cmd
+					}
 					m.GoForward(ui.HistoricalMenu)
 				case types.SubmitFocus:
 					action := ui.SubmitChoices[m.SubmitCursor].Action
@@ -71,8 +74,22 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Focus = types.MainFocus
 					m.MainCursor = 0
 					m.SubmitCursor = -1
-
 				}
+			case types.HistDataset:
+				m.Query.Dataset = &ui.Datasets[m.MainCursor]
+				m.GoBack()
+			case types.HistSymbol:
+				m.Query.Symbol = &m.Query.Dataset.Symbols[m.MainCursor]
+				m.GoBack()
+			case types.HistSchema:
+				m.Query.Schema = &ui.Schemas[m.MainCursor]
+				m.GoBack()
+			case types.HistStart:
+				m.GoBack()
+			case types.HistEnd:
+				m.GoBack()
+			case types.HistLimit:
+				m.GoBack()
 			default:
 				m.GoBack()
 			}
@@ -80,7 +97,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch m.Screen {
 			case types.HistMenuScreen:
 				m.SubmitCursor = -1
-				m.Query = types.Query{}
 			}
 			m.GoBack()
 		case "j", "down":

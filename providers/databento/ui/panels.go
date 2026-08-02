@@ -2,6 +2,7 @@ package ui
 
 import (
 	"charm.land/lipgloss/v2"
+	"fmt"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
 	"strings"
 )
@@ -28,35 +29,44 @@ func MainMenu(m *types.DatabentoModel) string {
 	case types.MainMenuScreen:
 		s.WriteString(PaddingStyle.Render(RenderMenu(Menu, m.MainCursor)))
 	case types.HistMenuScreen:
-		s.WriteString(LabelStyle.Render("Historical Request"))
-		s.WriteString("\n")
-		s.WriteString(PaddingStyle.Render(RenderMenu(HistoricalMenu, m.MainCursor)))
-		s.WriteString("\n")
-		s.WriteString(PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(SubmitChoices, m.SubmitCursor)))
+		fmt.Fprintf(&s, "%s\n%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			PaddingStyle.Render(RenderHistoricalMenu(m)),
+			PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(SubmitChoices, m.SubmitCursor)),
+		)
 	case types.HistDataset:
-		items := make([]types.MenuItem, len(Datasets))
-
-		for i, dataset := range Datasets {
-			items[i] = types.MenuItem{
-				Label: dataset.Display,
-			}
-		}
-
-		s.WriteString(LabelStyle.Render("Historical Request"))
-		s.WriteString("\n")
-		s.WriteString(PaddingStyle.Render(RenderMenu(items, m.MainCursor)))
+		fmt.Fprintf(
+			&s, "%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			PaddingStyle.Render(RenderMenu(
+				MenuItems(Datasets, func(d types.Dataset) string {
+					return d.Display
+				}),
+				m.MainCursor,
+			)),
+		)
 	case types.HistSymbol:
-		items := make([]types.MenuItem, len(FutureSymbols))
-
-		for i, symbol := range FutureSymbols {
-			items[i] = types.MenuItem{
-				Label: symbol.Display,
-			}
-		}
-
-		s.WriteString(LabelStyle.Render("Historical Request"))
-		s.WriteString("\n")
-		s.WriteString(PaddingStyle.Render(RenderMenu(items, m.MainCursor)))
+		fmt.Fprintf(
+			&s, "%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			PaddingStyle.Render(RenderMenu(
+				MenuItems(FutureSymbols, func(s types.Symbol) string {
+					return s.Display
+				}),
+				m.MainCursor,
+			)),
+		)
+	case types.HistSchema:
+		fmt.Fprintf(
+			&s, "%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			PaddingStyle.Render(RenderMenu(
+				MenuItems(Schemas, func(s types.Schema) string {
+					return s.Display
+				}),
+				m.MainCursor,
+			)),
+		)
 	}
 
 	return s.String()
@@ -116,26 +126,97 @@ func RenderMenu(items []types.MenuItem, cursor int) string {
 	return s.String()
 }
 
-func SchemaChoices(symbols []types.Schema) []types.MenuItem {
-	items := make([]types.MenuItem, len(symbols))
+func RenderHistoricalMenu(m *types.DatabentoModel) string {
+	var s strings.Builder
 
-	for i, symbol := range symbols {
-		items[i] = types.MenuItem{
-			Label: symbol.Display,
+	for i, item := range HistoricalMenu {
+		status := Status(m, item.Field)
+
+		if i == m.MainCursor {
+			fmt.Fprintf(&s, "> %s %s", HoverStyle.Render(item.Label), status)
+		} else {
+			if status == "[Locked]" {
+				fmt.Fprintf(&s, LockedStyle.Render(" %s %s"), item.Label, status)
+			} else {
+				fmt.Fprintf(&s, " %s %s", item.Label, status)
+			}
+		}
+
+		if i < len(HistoricalMenu)-1 {
+			s.WriteString("\n")
 		}
 	}
 
-	return items
+	dataset := ""
+	if m.Query.Dataset != nil {
+		dataset = m.Query.Dataset.Display
+	}
+	symbol := ""
+	if m.Query.Symbol != nil {
+		symbol = m.Query.Symbol.Display
+	}
+	schema := ""
+	if m.Query.Schema != nil {
+		schema = m.Query.Schema.Display
+	}
+	start := ""
+	if m.Query.StartDate != nil {
+		start = "not zero"
+	}
+	end := ""
+	if m.Query.EndDate != nil {
+		end = "not zero"
+	}
+	limit := ""
+	if m.Query.Limit != nil {
+		limit = fmt.Sprintf("%d", m.Query.Limit)
+	}
+
+	return lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		s.String(),
+		lipgloss.NewStyle().MarginLeft(1).PaddingLeft(1).BorderStyle(lipgloss.NormalBorder()).BorderLeft(true).Render(
+			fmt.Sprintf(
+				"Dataset: %v\nSymbol: %v\nSchema: %v\nStart: %v\nEnd: %v\nLimit: %v",
+				dataset,
+				symbol,
+				schema,
+				start,
+				end,
+				limit,
+			),
+		),
+	)
 }
 
-func SymbolChoices(symbols []types.Symbol) []types.MenuItem {
-	items := make([]types.MenuItem, len(symbols))
+func MenuItems[T any](items []T, label func(T) string) []types.MenuItem {
+	menu := make([]types.MenuItem, len(items))
 
-	for i, symbol := range symbols {
-		items[i] = types.MenuItem{
-			Label: symbol.Display,
+	for i, item := range items {
+		menu[i] = types.MenuItem{
+			Label: label(item),
 		}
 	}
 
-	return items
+	return menu
+}
+
+func Status(m *types.DatabentoModel, field types.QueryField) string {
+	switch field {
+	case types.DatasetField:
+		if m.Query.Dataset == nil {
+			return "[Not Selected]"
+		}
+		return "[Selected]"
+	case types.SymbolField:
+		if m.Query.Dataset == nil {
+			return "[Locked]"
+		}
+		if m.Query.Symbol == nil {
+			return "[Not Selected]"
+		}
+		return "[Selected]"
+	}
+
+	return ""
 }

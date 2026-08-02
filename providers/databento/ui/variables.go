@@ -26,12 +26,12 @@ var Menu = []types.MenuItem{
 }
 
 var HistoricalMenu = []types.MenuItem{
-	{Label: "Dataset", Target: types.HistDataset},
-	{Label: "Symbol", Target: types.HistSymbol},
-	{Label: "Schema", Target: types.HistSchema},
-	{Label: "Start", Target: types.HistStart},
-	{Label: "End", Target: types.HistEnd},
-	{Label: "Limit", Target: types.HistLimit},
+	{Label: "Dataset", Target: types.HistDataset, Field: types.DatasetField},
+	{Label: "Symbol", Target: types.HistSymbol, Field: types.SymbolField},
+	{Label: "Schema", Target: types.HistSchema, Field: types.SchemaField},
+	{Label: "Start", Target: types.HistStart, Field: types.StartField},
+	{Label: "End", Target: types.HistEnd, Field: types.EndField},
+	{Label: "Limit", Target: types.HistLimit, Field: types.LimitField},
 }
 
 var SubmitChoices = []types.MenuItem{
