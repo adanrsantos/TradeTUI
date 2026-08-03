@@ -12,8 +12,9 @@ var (
 	SuccessStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("46"))
 	ErrorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 
-	HoverStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("230"))
-	LockedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	HoverStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("230"))
+	LockedStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	DescriptionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
 
 	PaddingStyle = lipgloss.NewStyle().PaddingLeft(1)
 )

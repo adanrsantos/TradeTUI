@@ -11,13 +11,12 @@ func Dashboard(m *types.DatabentoModel) string {
 	var s strings.Builder
 	style := DashboardStyle
 
-	s.WriteString(Header(m.Secret))
-	s.WriteString("\n\n")
-	s.WriteString(MainMenu(m))
-	s.WriteString("\n\n")
-	s.WriteString(RecentActivity(m))
-	s.WriteString("\n\n")
-	s.WriteString(Keybinds())
+	fmt.Fprintf(&s, "%s\n\n%s\n\n%s\n\n%s",
+		Header(m.Secret),
+		MainMenu(m),
+		RecentActivity(m),
+		Keybinds(),
+	)
 
 	return style.Render(s.String())
 }
@@ -66,6 +65,13 @@ func MainMenu(m *types.DatabentoModel) string {
 				}),
 				m.MainCursor,
 			)),
+		)
+	case types.HistStart, types.HistEnd:
+		fmt.Fprintf(
+			&s, "%s\n%s\n\n%s",
+			LabelStyle.Render("Historical Request"),
+			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime)."),
+			PaddingStyle.Render(RenderTimeMenu(m)),
 		)
 	}
 
@@ -161,11 +167,11 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 	}
 	start := ""
 	if m.Query.StartDate != nil {
-		start = "not zero"
+		start = fmt.Sprintf("%s (%s)", m.Query.StartDate.Display, m.Query.StartDate.Value)
 	}
 	end := ""
 	if m.Query.EndDate != nil {
-		end = "not zero"
+		end = fmt.Sprintf("%s (%s)", m.Query.EndDate.Display, m.Query.EndDate.Value)
 	}
 	limit := ""
 	if m.Query.Limit != nil {
@@ -187,6 +193,23 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 			),
 		),
 	)
+}
+
+func RenderTimeMenu(m *types.DatabentoModel) string {
+	var s strings.Builder
+	for i, item := range TimePresets {
+		if m.MainCursor == i {
+			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), item.Display, item.Value)
+		} else {
+			fmt.Fprintf(&s, " %s (%s)", item.Display, item.Value)
+		}
+
+		if i < len(TimePresets)-1 {
+			s.WriteString("\n")
+		}
+	}
+
+	return s.String()
 }
 
 func MenuItems[T any](items []T, label func(T) string) []types.MenuItem {

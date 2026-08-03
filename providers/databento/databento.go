@@ -85,8 +85,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Query.Schema = &ui.Schemas[m.MainCursor]
 				m.GoBack()
 			case types.HistStart:
+				m.Query.StartDate = &ui.TimePresets[m.MainCursor]
 				m.GoBack()
 			case types.HistEnd:
+				m.Query.EndDate = &ui.TimePresets[m.MainCursor]
 				m.GoBack()
 			case types.HistLimit:
 				m.GoBack()
@@ -114,6 +116,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.FutureSymbols))
 			case types.HistSchema:
 				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.Schemas))
+			case types.HistStart:
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.TimePresets))
+			case types.HistEnd:
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.TimePresets))
 			case types.HistRequest:
 				// request screen logic
 			}

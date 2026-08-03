@@ -2,7 +2,6 @@ package types
 
 import (
 	"github.com/adanrsantos/TradeTUI/types"
-	"time"
 )
 
 type DatabentoModel struct {
@@ -21,8 +20,8 @@ type Query struct {
 	Dataset   *Dataset
 	Symbol    *Symbol
 	Schema    *Schema
-	StartDate *time.Time
-	EndDate   *time.Time
+	StartDate *TimePreset
+	EndDate   *TimePreset
 	Limit     *int
 }
 
@@ -47,6 +46,22 @@ type MenuItem struct {
 	Target Screen
 	Field  QueryField
 	Action Action
+}
+
+type TimeValue string
+
+const (
+	MarketOpen  TimeValue = "09:30"
+	MarketClose TimeValue = "16:00"
+	AsiaOpen    TimeValue = "20:00"
+	LondonOpen  TimeValue = "03:00"
+	Midnight    TimeValue = "00:00"
+	Noon        TimeValue = "12:00"
+)
+
+type TimePreset struct {
+	Display string
+	Value   TimeValue
 }
 
 type QueryField int

@@ -80,3 +80,30 @@ var Schemas = []types.Schema{
 		Value:   "ohlcv-1s",
 	},
 }
+
+var TimePresets = []types.TimePreset{
+	{
+		Display: "NY Market Open",
+		Value:   types.MarketOpen,
+	},
+	{
+		Display: "NY Market Close",
+		Value:   types.MarketClose,
+	},
+	{
+		Display: "Asia Open",
+		Value:   types.AsiaOpen,
+	},
+	{
+		Display: "LondonOpen",
+		Value:   types.LondonOpen,
+	},
+	{
+		Display: "Midnight",
+		Value:   types.Midnight,
+	},
+	{
+		Display: "Noon",
+		Value:   types.Noon,
+	},
+}
