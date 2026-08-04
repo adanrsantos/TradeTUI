@@ -16,11 +16,19 @@ type Model struct {
 }
 
 func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
+	ti := textinput.New()
+	ti.Placeholder = "YYYY-MM-DD"
+	ti.Prompt = ""
+	ti.CharLimit = 10
+	ti.SetWidth(20)
+
 	return &Model{
 		DatabentoModel: &types.DatabentoModel{
 			MainCursor:    0,
 			SubmitCursor:  -1,
 			SettingCursor: -1,
+			TimeInput:     ti,
+			Mode:          types.NormalMode,
 			Screen:        types.MainMenuScreen,
 			Focus:         types.MainFocus,
 			Cfg:           cfg,
@@ -35,6 +43,50 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+
+	if m.Mode == types.EditMode {
+		switch msg := msg.(type) {
+		case tea.KeyPressMsg:
+			s := msg.String()
+			switch msg.String() {
+			case "enter":
+				// value := m.TimeInput.Value()
+				m.TimeInput.Blur()
+				m.Mode = types.NormalMode
+				m.GoBack()
+			case "esc":
+				m.TimeInput.Blur()
+				m.Mode = types.NormalMode
+			case "backspace":
+				value := m.TimeInput.Value()
+				if len(value) == 5 && value[4:] == "-" {
+					m.TimeInput.SetValue(value[:4])
+					m.TimeInput.CursorEnd()
+				} else if len(value) == 8 && value[7:] == "-" {
+					m.TimeInput.SetValue(value[:7])
+					m.TimeInput.CursorEnd()
+				}
+			default:
+				if len(s) == 1 && (s[0] < '0' || s[0] > '9') {
+					return m, nil
+				}
+			}
+		}
+		m.TimeInput, cmd = m.TimeInput.Update(msg)
+
+		value := m.TimeInput.Value()
+
+		if len(value) == 4 && value[4:] != "-" {
+			m.TimeInput.SetValue(value + "-")
+			m.TimeInput.CursorEnd()
+		}
+
+		if len(value) == 7 && value[7:] != "-" {
+			m.TimeInput.SetValue(value + "-")
+			m.TimeInput.CursorEnd()
+		}
+		return m, cmd
+	}
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -86,8 +138,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Query.Schema = &ui.Schemas[m.MainCursor]
 				m.GoBack()
 			case types.HistStart:
-				m.Query.StartDate = &ui.TimePresets[m.MainCursor]
-				m.GoBack()
+				if m.MainCursor == len(ui.TimePresets)-1 {
+					m.Mode = types.EditMode
+					m.TimeInput.Focus()
+				} else {
+					m.Query.StartDate = &ui.TimePresets[m.MainCursor]
+					m.GoBack()
+				}
 			case types.HistEnd:
 				m.Query.EndDate = &ui.TimePresets[m.MainCursor]
 				m.GoBack()

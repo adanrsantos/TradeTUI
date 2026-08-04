@@ -197,16 +197,26 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 
 func RenderTimeMenu(m *types.DatabentoModel) string {
 	var s strings.Builder
-	for i, item := range TimePresets {
-		if m.MainCursor == i {
-			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), item.Display, item.Value)
-		} else {
-			fmt.Fprintf(&s, " %s (%s)", item.Display, item.Value)
-		}
+	length := len(TimePresets)
 
-		if i < len(TimePresets)-1 {
-			s.WriteString("\n")
+	for i := 0; i < length-1; i++ {
+		if m.MainCursor == i {
+			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), TimePresets[i].Display, TimePresets[i].Value)
+		} else {
+			fmt.Fprintf(&s, " %s (%s)", TimePresets[i].Display, TimePresets[i].Value)
 		}
+		s.WriteString("\n")
+	}
+
+	switch m.Mode {
+	case types.NormalMode:
+		if m.MainCursor == length-1 {
+			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), TimePresets[length-1].Display, TimePresets[length-1].Value)
+		} else {
+			fmt.Fprintf(&s, " %s (%s)", TimePresets[length-1].Display, TimePresets[length-1].Value)
+		}
+	case types.EditMode:
+		fmt.Fprintf(&s, HoverStyle.Render("> %s"), m.TimeInput.View())
 	}
 
 	return s.String()

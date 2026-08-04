@@ -10,7 +10,8 @@ type DatabentoModel struct {
 	CursorStack   []int
 	SubmitCursor  int
 	SettingCursor int
-	TextInput     textinput.Model
+	TimeInput     textinput.Model
+	Mode          Mode
 	Query         Query
 	Screen        Screen
 	Focus         Focus
@@ -50,6 +51,13 @@ type MenuItem struct {
 	Action Action
 }
 
+type Mode int
+
+const (
+	NormalMode Mode = iota
+	EditMode
+)
+
 type TimeValue string
 
 const (
@@ -59,6 +67,7 @@ const (
 	LondonOpen  TimeValue = "03:00"
 	Midnight    TimeValue = "00:00"
 	Noon        TimeValue = "12:00"
+	Custom      TimeValue = "Select to enter a custom time"
 )
 
 type TimePreset struct {

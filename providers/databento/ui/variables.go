@@ -106,4 +106,8 @@ var TimePresets = []types.TimePreset{
 		Display: "Noon",
 		Value:   types.Noon,
 	},
+	{
+		Display: "Custom",
+		Value:   types.Custom,
+	},
 }
