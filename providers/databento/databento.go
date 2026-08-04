@@ -5,6 +5,7 @@ import (
 	"charm.land/lipgloss/v2"
 	//"fmt"
 	//"github.com/adanrsantos/TradeTUI/providers/databento/api"
+	"charm.land/bubbles/v2/textinput"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
 	"github.com/adanrsantos/TradeTUI/providers/databento/ui"
 	globalTypes "github.com/adanrsantos/TradeTUI/types"

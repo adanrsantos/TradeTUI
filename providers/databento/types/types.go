@@ -1,6 +1,7 @@
 package types
 
 import (
+	"charm.land/bubbles/v2/textinput"
 	"github.com/adanrsantos/TradeTUI/types"
 )
 
@@ -9,6 +10,7 @@ type DatabentoModel struct {
 	CursorStack   []int
 	SubmitCursor  int
 	SettingCursor int
+	TextInput     textinput.Model
 	Query         Query
 	Screen        Screen
 	Focus         Focus
