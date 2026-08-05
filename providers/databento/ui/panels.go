@@ -70,7 +70,7 @@ func MainMenu(m *types.DatabentoModel) string {
 		fmt.Fprintf(
 			&s, "%s\n%s\n\n%s",
 			LabelStyle.Render("Historical Request"),
-			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime)."),
+			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime).\nYYYY-MM-DD Ex. 2026-01-15"),
 			PaddingStyle.Render(RenderTimeMenu(m)),
 		)
 	}

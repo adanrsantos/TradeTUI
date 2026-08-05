@@ -44,13 +44,27 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	if m.Mode == types.EditMode {
+	if m.Mode == types.EditMode && (m.Screen == types.HistStart || m.Screen == types.HistEnd) {
 		switch msg := msg.(type) {
 		case tea.KeyPressMsg:
 			s := msg.String()
 			switch msg.String() {
 			case "enter":
-				// value := m.TimeInput.Value()
+				value := m.TimeInput.Value()
+				switch m.Screen {
+				case types.HistStart:
+					m.Query.StartDate = &types.TimePreset{
+						Display: value,
+						Value:   types.TimeValue(value),
+					}
+				case types.HistEnd:
+					m.Query.EndDate = &types.TimePreset{
+						Display: value,
+						Value:   types.TimeValue(value),
+					}
+				}
+
+				m.TimeInput.Reset()
 				m.TimeInput.Blur()
 				m.Mode = types.NormalMode
 				m.GoBack()
