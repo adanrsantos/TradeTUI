@@ -160,8 +160,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.GoBack()
 				}
 			case types.HistEnd:
-				m.Query.EndDate = &ui.TimePresets[m.MainCursor]
-				m.GoBack()
+				if m.MainCursor == len(ui.TimePresets)-1 {
+					m.Mode = types.EditMode
+					m.TimeInput.Focus()
+				} else {
+					m.Query.EndDate = &ui.TimePresets[m.MainCursor]
+					m.GoBack()
+				}
 			case types.HistLimit:
 				m.GoBack()
 			default:
