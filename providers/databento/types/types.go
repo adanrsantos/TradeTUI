@@ -40,8 +40,10 @@ type Symbol struct {
 }
 
 type Schema struct {
-	Display string
-	Value   string
+	Display           string
+	Value             string
+	CompatiblePresets []TimePreset
+	TimeRange         string
 }
 
 type MenuItem struct {
@@ -67,7 +69,10 @@ const (
 	LondonOpen  TimeValue = "03:00"
 	Midnight    TimeValue = "00:00"
 	Noon        TimeValue = "12:00"
-	Custom      TimeValue = "Select to enter a custom time"
+
+	Custom TimeValue = "Custom"
+
+	NYHourOpen TimeValue = "09:00"
 )
 
 type TimePreset struct {

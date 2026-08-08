@@ -17,9 +17,8 @@ type Model struct {
 
 func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
 	ti := textinput.New()
-	ti.Placeholder = "YYYY-MM-DD"
+	ti.Placeholder = ""
 	ti.Prompt = ""
-	ti.CharLimit = 10
 	ti.SetWidth(20)
 
 	return &Model{
@@ -124,8 +123,20 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case types.HistMenuScreen:
 				switch m.Focus {
 				case types.MainFocus:
-					if m.MainCursor == int(types.SymbolField) && m.Query.Dataset == nil {
+					if m.MainCursor == int(types.DatasetField) {
+						m.GoForward(ui.HistoricalMenu)
 						return m, cmd
+					} else {
+						switch m.MainCursor {
+						case int(types.SymbolField), int(types.SchemaField):
+							if m.Query.Dataset == nil {
+								return m, cmd
+							}
+						case int(types.StartField), int(types.EndField):
+							if m.Query.Schema == nil {
+								return m, cmd
+							}
+						}
 					}
 					m.GoForward(ui.HistoricalMenu)
 				case types.SubmitFocus:
@@ -152,19 +163,25 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Query.Schema = &ui.Schemas[m.MainCursor]
 				m.GoBack()
 			case types.HistStart:
-				if m.MainCursor == len(ui.TimePresets)-1 {
+				presets := m.Query.Schema.CompatiblePresets
+				if m.MainCursor == len(presets)-1 {
 					m.Mode = types.EditMode
 					m.TimeInput.Focus()
+					m.TimeInput.Placeholder = m.Query.Schema.TimeRange
+					m.TimeInput.CharLimit = len(m.Query.Schema.TimeRange)
 				} else {
-					m.Query.StartDate = &ui.TimePresets[m.MainCursor]
+					m.Query.StartDate = &presets[m.MainCursor]
 					m.GoBack()
 				}
 			case types.HistEnd:
-				if m.MainCursor == len(ui.TimePresets)-1 {
+				presets := m.Query.Schema.CompatiblePresets
+				if m.MainCursor == len(presets)-1 {
 					m.Mode = types.EditMode
 					m.TimeInput.Focus()
+					m.TimeInput.Placeholder = m.Query.Schema.TimeRange
+					m.TimeInput.CharLimit = len(m.Query.Schema.TimeRange)
 				} else {
-					m.Query.EndDate = &ui.TimePresets[m.MainCursor]
+					m.Query.EndDate = &presets[m.MainCursor]
 					m.GoBack()
 				}
 			case types.HistLimit:
@@ -194,9 +211,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case types.HistSchema:
 				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.Schemas))
 			case types.HistStart:
-				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.TimePresets))
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(m.Query.Schema.CompatiblePresets))
 			case types.HistEnd:
-				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.TimePresets))
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(m.Query.Schema.CompatiblePresets))
 			case types.HistRequest:
 				// request screen logic
 			}

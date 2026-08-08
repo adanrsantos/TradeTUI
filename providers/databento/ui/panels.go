@@ -197,13 +197,15 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 
 func RenderTimeMenu(m *types.DatabentoModel) string {
 	var s strings.Builder
-	length := len(TimePresets)
+	presets := m.Query.Schema.CompatiblePresets
+	length := len(presets)
 
 	for i := 0; i < length-1; i++ {
 		if m.MainCursor == i {
-			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), TimePresets[i].Display, TimePresets[i].Value)
+			s.WriteString("> ")
+			fmt.Fprintf(&s, HoverStyle.Render("%s (%s)"), presets[i].Display, presets[i].Value)
 		} else {
-			fmt.Fprintf(&s, " %s (%s)", TimePresets[i].Display, TimePresets[i].Value)
+			fmt.Fprintf(&s, " %s (%s)", presets[i].Display, presets[i].Value)
 		}
 		s.WriteString("\n")
 	}
@@ -211,12 +213,13 @@ func RenderTimeMenu(m *types.DatabentoModel) string {
 	switch m.Mode {
 	case types.NormalMode:
 		if m.MainCursor == length-1 {
-			fmt.Fprintf(&s, HoverStyle.Render("> %s (%s)"), TimePresets[length-1].Display, TimePresets[length-1].Value)
+			s.WriteString("> ")
+			fmt.Fprintf(&s, HoverStyle.Render("%s (%s)"), presets[length-1].Display, presets[length-1].Value)
 		} else {
-			fmt.Fprintf(&s, " %s (%s)", TimePresets[length-1].Display, TimePresets[length-1].Value)
+			fmt.Fprintf(&s, " %s (%s)", presets[length-1].Display, presets[length-1].Value)
 		}
 	case types.EditMode:
-		fmt.Fprintf(&s, HoverStyle.Render("> %s"), m.TimeInput.View())
+		fmt.Fprintf(&s, "> %s\nEnter time as %s", HoverStyle.Render(m.TimeInput.View()), DescriptionStyle.Render(m.Query.Schema.TimeRange))
 	}
 
 	return s.String()
@@ -240,7 +243,6 @@ func Status(m *types.DatabentoModel, field types.QueryField) string {
 		if m.Query.Dataset == nil {
 			return "[Not Selected]"
 		}
-		return "[Selected]"
 	case types.SymbolField:
 		if m.Query.Dataset == nil {
 			return "[Locked]"
@@ -248,8 +250,31 @@ func Status(m *types.DatabentoModel, field types.QueryField) string {
 		if m.Query.Symbol == nil {
 			return "[Not Selected]"
 		}
-		return "[Selected]"
+	case types.SchemaField:
+		if m.Query.Dataset == nil {
+			return "[Locked]"
+		}
+		if m.Query.Schema == nil {
+			return "[Not Selected]"
+		}
+	case types.StartField:
+		if m.Query.Schema == nil {
+			return "[Locked]"
+		}
+		if m.Query.StartDate == nil {
+			return "[Not Selected]"
+		}
+	case types.EndField:
+		if m.Query.Schema == nil {
+			return "[Locked]"
+		}
+		if m.Query.EndDate == nil {
+			return "[Not Selected]"
+		}
+	case types.LimitField:
+		if m.Query.Limit == nil {
+			return "[Not Selected]"
+		}
 	}
-
 	return ""
 }

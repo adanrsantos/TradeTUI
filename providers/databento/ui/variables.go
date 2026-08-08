@@ -64,24 +64,32 @@ var FutureSymbols = []types.Symbol{
 
 var Schemas = []types.Schema{
 	{
-		Display: "1 second (ohlcv-1s)",
-		Value:   "ohlcv-1s",
+		Display:           "1 second (ohlcv-1s)",
+		Value:             "ohlcv-1s",
+		CompatiblePresets: SecondPresets,
+		TimeRange:         "YYYY-MM-DDT00:00:00",
 	},
 	{
-		Display: "1 minute (ohlcv-1m)",
-		Value:   "ohlcv-1s",
+		Display:           "1 minute (ohlcv-1m)",
+		Value:             "ohlcv-1m",
+		CompatiblePresets: MinutePresets,
+		TimeRange:         "YYYY-MM-DDT00:00",
 	},
 	{
-		Display: "1 hour (ohlcv-1h)",
-		Value:   "ohlcv-1s",
+		Display:           "1 hour (ohlcv-1h)",
+		Value:             "ohlcv-1h",
+		CompatiblePresets: HourPresets,
+		TimeRange:         "YYYY-MM-DDT00",
 	},
 	{
-		Display: "daily (ohlcv-1d)",
-		Value:   "ohlcv-1s",
+		Display:           "daily (ohlcv-1d)",
+		Value:             "ohlcv-1d",
+		CompatiblePresets: DailyPresets,
+		TimeRange:         "YYYY-MM-DD",
 	},
 }
 
-var TimePresets = []types.TimePreset{
+var SecondPresets = []types.TimePreset{
 	{
 		Display: "NY Market Open",
 		Value:   types.MarketOpen,
@@ -106,6 +114,75 @@ var TimePresets = []types.TimePreset{
 		Display: "Noon",
 		Value:   types.Noon,
 	},
+	{
+		Display: "Custom",
+		Value:   types.Custom,
+	},
+}
+
+var MinutePresets = []types.TimePreset{
+	{
+		Display: "NY Market Open",
+		Value:   types.MarketOpen,
+	},
+	{
+		Display: "NY Market Close",
+		Value:   types.MarketClose,
+	},
+	{
+		Display: "Asia Open",
+		Value:   types.AsiaOpen,
+	},
+	{
+		Display: "London Open",
+		Value:   types.LondonOpen,
+	},
+	{
+		Display: "Midnight",
+		Value:   types.Midnight,
+	},
+	{
+		Display: "Noon",
+		Value:   types.Noon,
+	},
+	{
+		Display: "Custom",
+		Value:   types.Custom,
+	},
+}
+
+var HourPresets = []types.TimePreset{
+	{
+		Display: "NY Market Hour Open",
+		Value:   types.NYHourOpen,
+	},
+	{
+		Display: "NY Market Close",
+		Value:   types.MarketClose,
+	},
+	{
+		Display: "Asia Open",
+		Value:   types.AsiaOpen,
+	},
+	{
+		Display: "London Open",
+		Value:   types.LondonOpen,
+	},
+	{
+		Display: "Midnight",
+		Value:   types.Midnight,
+	},
+	{
+		Display: "Noon",
+		Value:   types.Noon,
+	},
+	{
+		Display: "Custom",
+		Value:   types.Custom,
+	},
+}
+
+var DailyPresets = []types.TimePreset{
 	{
 		Display: "Custom",
 		Value:   types.Custom,
