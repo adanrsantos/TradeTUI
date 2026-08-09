@@ -71,14 +71,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.TimeInput.Blur()
 				m.Mode = types.NormalMode
 			case "backspace":
-				value := m.TimeInput.Value()
-				if len(value) == 5 && value[4:] == "-" {
-					m.TimeInput.SetValue(value[:4])
-					m.TimeInput.CursorEnd()
-				} else if len(value) == 8 && value[7:] == "-" {
-					m.TimeInput.SetValue(value[:7])
-					m.TimeInput.CursorEnd()
-				}
+				m.DeleteInputChar()
 			default:
 				if len(s) == 1 && (s[0] < '0' || s[0] > '9') {
 					return m, nil
@@ -87,17 +80,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.TimeInput, cmd = m.TimeInput.Update(msg)
 
-		value := m.TimeInput.Value()
+		m.ValidateTime()
 
-		if len(value) == 4 && value[4:] != "-" {
-			m.TimeInput.SetValue(value + "-")
-			m.TimeInput.CursorEnd()
-		}
-
-		if len(value) == 7 && value[7:] != "-" {
-			m.TimeInput.SetValue(value + "-")
-			m.TimeInput.CursorEnd()
-		}
 		return m, cmd
 	}
 	switch msg := msg.(type) {
@@ -167,8 +151,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.MainCursor == len(presets)-1 {
 					m.Mode = types.EditMode
 					m.TimeInput.Focus()
-					m.TimeInput.Placeholder = m.Query.Schema.TimeRange
-					m.TimeInput.CharLimit = len(m.Query.Schema.TimeRange)
+					format := ui.TimeFormats[m.Query.Schema.Value]
+					m.TimeInput.Placeholder = format.Placeholder
+					m.TimeInput.CharLimit = format.CharLimit
 				} else {
 					m.Query.StartDate = &presets[m.MainCursor]
 					m.GoBack()
@@ -178,8 +163,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.MainCursor == len(presets)-1 {
 					m.Mode = types.EditMode
 					m.TimeInput.Focus()
-					m.TimeInput.Placeholder = m.Query.Schema.TimeRange
-					m.TimeInput.CharLimit = len(m.Query.Schema.TimeRange)
+					format := ui.TimeFormats[m.Query.Schema.Value]
+					m.TimeInput.Placeholder = format.Placeholder
+					m.TimeInput.CharLimit = format.CharLimit
 				} else {
 					m.Query.EndDate = &presets[m.MainCursor]
 					m.GoBack()
@@ -273,4 +259,122 @@ func IncreaseCursor(cursor int, max int) int {
 		return cursor + 1
 	}
 	return cursor
+}
+
+func (m *Model) ValidateTime() {
+	value := m.TimeInput.Value()
+	switch len(value) {
+	case 1:
+		if value[0] != '1' && value[0] != '2' {
+			m.TimeInput.SetValue("")
+		}
+	case 2:
+		if value[0] == '1' {
+			if value[1] != '9' {
+				m.TimeInput.SetValue(value[:1])
+			}
+		} else {
+			if value[1] != '0' {
+				m.TimeInput.SetValue(value[:1])
+			}
+		}
+	case 3:
+		if value[1] == '0' {
+			if value[2] != '0' && value[2] != '1' && value[2] != '2' {
+				m.TimeInput.SetValue(value[:2])
+			}
+		}
+	case 4:
+		if value[1] == '0' && value[2] == '2' {
+			if value[3] > '6' {
+				m.TimeInput.SetValue(value[:3])
+			}
+		}
+		if len(m.TimeInput.Value()) == 4 {
+			m.TimeInput.SetValue(value + "-")
+		}
+	case 6:
+		if value[5] != '0' && value[5] != '1' {
+			m.TimeInput.SetValue(value[:5])
+		}
+	case 7:
+		if value[5] == '1' {
+			if value[6] != '0' && value[6] != '1' && value[6] != '2' {
+				m.TimeInput.SetValue(value[:6])
+			}
+		} else {
+			if value[6] == '0' {
+				m.TimeInput.SetValue(value[:6])
+			}
+		}
+		if len(m.TimeInput.Value()) == 7 {
+			m.TimeInput.SetValue(value + "-")
+		}
+	case 9:
+		if value[8] > '3' {
+			m.TimeInput.SetValue(value[:8])
+		}
+	case 10:
+		if value[8] == '3' {
+			if value[9] > '1' {
+				m.TimeInput.SetValue(value[:9])
+			}
+		} else if value[8] == '0' {
+			if value[9] == '0' {
+				m.TimeInput.SetValue(value[:9])
+			}
+		}
+		if len(m.TimeInput.Value()) == 10 {
+			input := ui.TimeFormats[m.Query.Schema.Value]
+			if input.CharLimit > 10 {
+				m.TimeInput.SetValue(value + "T")
+			}
+		}
+	case 12:
+		if value[11] > '2' {
+			m.TimeInput.SetValue(value[:11])
+		}
+	case 13:
+		if value[11] == '2' {
+			if value[12] > '3' {
+				m.TimeInput.SetValue(value[:12])
+			}
+		}
+		if len(m.TimeInput.Value()) == 13 {
+			input := ui.TimeFormats[m.Query.Schema.Value]
+			if input.CharLimit > 13 {
+				m.TimeInput.SetValue(value + ":")
+			}
+		}
+	case 15:
+		if value[14] > '5' {
+			m.TimeInput.SetValue(value[:14])
+		}
+	case 16:
+		input := ui.TimeFormats[m.Query.Schema.Value]
+		if input.CharLimit > 16 {
+			m.TimeInput.SetValue(value + ":")
+		}
+	case 18:
+		if value[17] > '5' {
+			m.TimeInput.SetValue(value[:14])
+		}
+	}
+	m.TimeInput.CursorEnd()
+}
+
+func (m *Model) DeleteInputChar() {
+	value := m.TimeInput.Value()
+	if len(value) == 5 && value[4:] == "-" {
+		m.TimeInput.SetValue(value[:4])
+	} else if len(value) == 8 && value[7:] == "-" {
+		m.TimeInput.SetValue(value[:7])
+	} else if len(value) == 11 && value[10:] == "T" {
+		m.TimeInput.SetValue(value[:10])
+	} else if len(value) == 14 && value[13:] == ":" {
+		m.TimeInput.SetValue(value[:13])
+	} else if len(value) == 17 && value[16:] == ":" {
+		m.TimeInput.SetValue(value[:16])
+	}
+	m.TimeInput.CursorEnd()
 }

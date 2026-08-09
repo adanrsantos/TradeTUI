@@ -67,25 +67,21 @@ var Schemas = []types.Schema{
 		Display:           "1 second (ohlcv-1s)",
 		Value:             "ohlcv-1s",
 		CompatiblePresets: SecondPresets,
-		TimeRange:         "YYYY-MM-DDT00:00:00",
 	},
 	{
 		Display:           "1 minute (ohlcv-1m)",
 		Value:             "ohlcv-1m",
 		CompatiblePresets: MinutePresets,
-		TimeRange:         "YYYY-MM-DDT00:00",
 	},
 	{
 		Display:           "1 hour (ohlcv-1h)",
 		Value:             "ohlcv-1h",
 		CompatiblePresets: HourPresets,
-		TimeRange:         "YYYY-MM-DDT00",
 	},
 	{
 		Display:           "daily (ohlcv-1d)",
 		Value:             "ohlcv-1d",
 		CompatiblePresets: DailyPresets,
-		TimeRange:         "YYYY-MM-DD",
 	},
 }
 
@@ -186,5 +182,28 @@ var DailyPresets = []types.TimePreset{
 	{
 		Display: "Custom",
 		Value:   types.Custom,
+	},
+}
+
+var TimeFormats = map[string]types.TimeFormat{
+	"ohlcv-1s": {
+		Layout:      "2006-01-02T15:04:05",
+		Placeholder: "YYYY-MM-DDTHH:MM:SS",
+		CharLimit:   19,
+	},
+	"ohlcv-1m": {
+		Layout:      "2006-01-02T15:04",
+		Placeholder: "YYYY-MM-DDTHH:MM",
+		CharLimit:   16,
+	},
+	"ohlcv-1h": {
+		Layout:      "2006-01-02T15",
+		Placeholder: "YYYY-MM-DDTHH",
+		CharLimit:   13,
+	},
+	"ohlcv-1d": {
+		Layout:      "2006-01-02",
+		Placeholder: "YYYY-MM-DD",
+		CharLimit:   10,
 	},
 }

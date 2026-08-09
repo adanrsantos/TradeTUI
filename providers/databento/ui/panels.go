@@ -70,7 +70,7 @@ func MainMenu(m *types.DatabentoModel) string {
 		fmt.Fprintf(
 			&s, "%s\n%s\n\n%s",
 			LabelStyle.Render("Historical Request"),
-			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime).\nYYYY-MM-DD Ex. 2026-01-15"),
+			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime).\nYYYY-MM-DDTHH:MM:SS Ex. 2026-01-02T12:04:05"),
 			PaddingStyle.Render(RenderTimeMenu(m)),
 		)
 	}
@@ -219,7 +219,7 @@ func RenderTimeMenu(m *types.DatabentoModel) string {
 			fmt.Fprintf(&s, " %s (%s)", presets[length-1].Display, presets[length-1].Value)
 		}
 	case types.EditMode:
-		fmt.Fprintf(&s, "> %s\nEnter time as %s", HoverStyle.Render(m.TimeInput.View()), DescriptionStyle.Render(m.Query.Schema.TimeRange))
+		fmt.Fprintf(&s, "> %s\nEnter time as %s", HoverStyle.Render(m.TimeInput.View()), DescriptionStyle.Render(TimeDescription(*m.Query.Schema)))
 	}
 
 	return s.String()
@@ -277,4 +277,14 @@ func Status(m *types.DatabentoModel, field types.QueryField) string {
 		}
 	}
 	return ""
+}
+
+func TimeDescription(schema types.Schema) string {
+	format, ok := TimeFormats[schema.Value]
+
+	if !ok {
+		return ""
+	}
+
+	return format.Layout
 }

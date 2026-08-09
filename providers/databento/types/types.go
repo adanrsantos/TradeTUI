@@ -43,7 +43,6 @@ type Schema struct {
 	Display           string
 	Value             string
 	CompatiblePresets []TimePreset
-	TimeRange         string
 }
 
 type MenuItem struct {
@@ -51,6 +50,12 @@ type MenuItem struct {
 	Target Screen
 	Field  QueryField
 	Action Action
+}
+
+type TimeFormat struct {
+	Layout      string
+	Placeholder string
+	CharLimit   int
 }
 
 type Mode int
