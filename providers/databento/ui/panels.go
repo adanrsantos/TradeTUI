@@ -33,6 +33,10 @@ func MainMenu(m *types.DatabentoModel) string {
 			PaddingStyle.Render(RenderHistoricalMenu(m)),
 			PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(SubmitChoices, m.SubmitCursor)),
 		)
+
+		if m.ErrQuery != nil {
+			fmt.Fprintf(&s, "\n%s", ErrorStyle.Render(m.ErrQuery.Error()))
+		}
 	case types.HistDataset:
 		fmt.Fprintf(
 			&s, "%s\n%s",
@@ -71,11 +75,27 @@ func MainMenu(m *types.DatabentoModel) string {
 			&s, "%s\n%s\n\n%s",
 			LabelStyle.Render("Historical Request"),
 			DescriptionStyle.Render("All timestamps use America/NewYork (EasternTime).\nYYYY-MM-DDTHH:MM:SS Ex. 2026-01-02T12:04:05"),
-			PaddingStyle.Render(RenderTimeMenu(m)),
+			PaddingStyle.Render(TimeInputView(m)),
+		)
+	case types.HistLimit:
+		fmt.Fprintf(
+			&s, "%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			PaddingStyle.Render(LimitInputView(m)),
+		)
+	case types.HistRequest:
+		fmt.Fprintf(&s, "%s\n%s\n%s",
+			LabelStyle.Render("Historical Request"),
+			RawQueryView(m),
+			PaddingStyle.BorderStyle(lipgloss.NormalBorder()).BorderTop(true).Render(RenderMenu(RequestChoices, m.MainCursor)),
 		)
 	}
 
 	return s.String()
+}
+
+func RawQueryView(m *types.DatabentoModel) string {
+	return ""
 }
 
 func Header(secret string) string {
@@ -167,15 +187,15 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 	}
 	start := ""
 	if m.Query.StartDate != nil {
-		start = fmt.Sprintf("%s (%s)", m.Query.StartDate.Display, m.Query.StartDate.Value)
+		start = fmt.Sprintf("%s", *m.Query.StartDate)
 	}
 	end := ""
 	if m.Query.EndDate != nil {
-		end = fmt.Sprintf("%s (%s)", m.Query.EndDate.Display, m.Query.EndDate.Value)
+		end = fmt.Sprintf("%s", *m.Query.EndDate)
 	}
 	limit := ""
 	if m.Query.Limit != nil {
-		limit = fmt.Sprintf("%d", m.Query.Limit)
+		limit = fmt.Sprintf("%d", *m.Query.Limit)
 	}
 
 	return lipgloss.JoinHorizontal(
@@ -195,31 +215,24 @@ func RenderHistoricalMenu(m *types.DatabentoModel) string {
 	)
 }
 
-func RenderTimeMenu(m *types.DatabentoModel) string {
+func TimeInputView(m *types.DatabentoModel) string {
 	var s strings.Builder
-	presets := m.Query.Schema.CompatiblePresets
-	length := len(presets)
 
-	for i := 0; i < length-1; i++ {
-		if m.MainCursor == i {
-			s.WriteString("> ")
-			fmt.Fprintf(&s, HoverStyle.Render("%s (%s)"), presets[i].Display, presets[i].Value)
-		} else {
-			fmt.Fprintf(&s, " %s (%s)", presets[i].Display, presets[i].Value)
-		}
-		s.WriteString("\n")
+	fmt.Fprintf(&s, "Enter time as %s\n> %s", DescriptionStyle.Render(TimeDescription(*m.Query.Schema)), HoverStyle.Render(m.Input.View()))
+
+	if m.ErrInput != nil {
+		fmt.Fprintf(&s, "\n%s", ErrorStyle.Render(m.ErrInput.Error()))
 	}
 
-	switch m.Mode {
-	case types.NormalMode:
-		if m.MainCursor == length-1 {
-			s.WriteString("> ")
-			fmt.Fprintf(&s, HoverStyle.Render("%s (%s)"), presets[length-1].Display, presets[length-1].Value)
-		} else {
-			fmt.Fprintf(&s, " %s (%s)", presets[length-1].Display, presets[length-1].Value)
-		}
-	case types.EditMode:
-		fmt.Fprintf(&s, "> %s\nEnter time as %s", HoverStyle.Render(m.TimeInput.View()), DescriptionStyle.Render(TimeDescription(*m.Query.Schema)))
+	return s.String()
+}
+
+func LimitInputView(m *types.DatabentoModel) string {
+	var s strings.Builder
+
+	fmt.Fprintf(&s, "%s\n> %s", DescriptionStyle.Render("0 means no restriction. Amount of records will depend on StartField and EndField"), HoverStyle.Render(m.Input.View()))
+	if m.ErrInput != nil {
+		fmt.Fprintf(&s, "\n%s", ErrorStyle.Render(m.ErrInput.Error()))
 	}
 
 	return s.String()

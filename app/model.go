@@ -92,7 +92,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "esc":
 			if m.Screen == types.ProviderScreen {
-				m.Screen = types.SettingScreen
+				// m.Screen = types.SettingScreen
 			}
 		case "enter":
 			if m.Screen == types.SettingScreen {

@@ -16,6 +16,7 @@ var Parent = map[types.Screen]types.Screen{
 	types.HistStart:   types.HistMenuScreen,
 	types.HistEnd:     types.HistMenuScreen,
 	types.HistLimit:   types.HistMenuScreen,
+	types.HistRequest: types.HistMenuScreen,
 }
 
 var Menu = []types.MenuItem{
@@ -35,8 +36,13 @@ var HistoricalMenu = []types.MenuItem{
 }
 
 var SubmitChoices = []types.MenuItem{
-	{Label: "Submit", Action: types.SubmitAction},
+	{Label: "Submit", Target: types.HistRequest, Action: types.SubmitAction},
 	{Label: "Reset", Action: types.ResetAction},
+}
+
+var RequestChoices = []types.MenuItem{
+	{Label: "Cancel", Action: types.CancelAction},
+	{Label: "Continue", Action: types.ContinueAction},
 }
 
 var Datasets = []types.Dataset{
@@ -64,124 +70,20 @@ var FutureSymbols = []types.Symbol{
 
 var Schemas = []types.Schema{
 	{
-		Display:           "1 second (ohlcv-1s)",
-		Value:             "ohlcv-1s",
-		CompatiblePresets: SecondPresets,
+		Display: "1 second (ohlcv-1s)",
+		Value:   "ohlcv-1s",
 	},
 	{
-		Display:           "1 minute (ohlcv-1m)",
-		Value:             "ohlcv-1m",
-		CompatiblePresets: MinutePresets,
+		Display: "1 minute (ohlcv-1m)",
+		Value:   "ohlcv-1m",
 	},
 	{
-		Display:           "1 hour (ohlcv-1h)",
-		Value:             "ohlcv-1h",
-		CompatiblePresets: HourPresets,
+		Display: "1 hour (ohlcv-1h)",
+		Value:   "ohlcv-1h",
 	},
 	{
-		Display:           "daily (ohlcv-1d)",
-		Value:             "ohlcv-1d",
-		CompatiblePresets: DailyPresets,
-	},
-}
-
-var SecondPresets = []types.TimePreset{
-	{
-		Display: "NY Market Open",
-		Value:   types.MarketOpen,
-	},
-	{
-		Display: "NY Market Close",
-		Value:   types.MarketClose,
-	},
-	{
-		Display: "Asia Open",
-		Value:   types.AsiaOpen,
-	},
-	{
-		Display: "LondonOpen",
-		Value:   types.LondonOpen,
-	},
-	{
-		Display: "Midnight",
-		Value:   types.Midnight,
-	},
-	{
-		Display: "Noon",
-		Value:   types.Noon,
-	},
-	{
-		Display: "Custom",
-		Value:   types.Custom,
-	},
-}
-
-var MinutePresets = []types.TimePreset{
-	{
-		Display: "NY Market Open",
-		Value:   types.MarketOpen,
-	},
-	{
-		Display: "NY Market Close",
-		Value:   types.MarketClose,
-	},
-	{
-		Display: "Asia Open",
-		Value:   types.AsiaOpen,
-	},
-	{
-		Display: "London Open",
-		Value:   types.LondonOpen,
-	},
-	{
-		Display: "Midnight",
-		Value:   types.Midnight,
-	},
-	{
-		Display: "Noon",
-		Value:   types.Noon,
-	},
-	{
-		Display: "Custom",
-		Value:   types.Custom,
-	},
-}
-
-var HourPresets = []types.TimePreset{
-	{
-		Display: "NY Market Hour Open",
-		Value:   types.NYHourOpen,
-	},
-	{
-		Display: "NY Market Close",
-		Value:   types.MarketClose,
-	},
-	{
-		Display: "Asia Open",
-		Value:   types.AsiaOpen,
-	},
-	{
-		Display: "London Open",
-		Value:   types.LondonOpen,
-	},
-	{
-		Display: "Midnight",
-		Value:   types.Midnight,
-	},
-	{
-		Display: "Noon",
-		Value:   types.Noon,
-	},
-	{
-		Display: "Custom",
-		Value:   types.Custom,
-	},
-}
-
-var DailyPresets = []types.TimePreset{
-	{
-		Display: "Custom",
-		Value:   types.Custom,
+		Display: "daily (ohlcv-1d)",
+		Value:   "ohlcv-1d",
 	},
 }
 

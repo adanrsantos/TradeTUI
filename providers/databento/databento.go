@@ -3,7 +3,9 @@ package databento
 import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	//"fmt"
+	"errors"
+	"strconv"
+	"time"
 	//"github.com/adanrsantos/TradeTUI/providers/databento/api"
 	"charm.land/bubbles/v2/textinput"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
@@ -26,8 +28,11 @@ func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
 			MainCursor:    0,
 			SubmitCursor:  -1,
 			SettingCursor: -1,
-			TimeInput:     ti,
+			Input:         ti,
+			ErrInput:      nil,
 			Mode:          types.NormalMode,
+			Query:         types.Query{},
+			ErrQuery:      nil,
 			Screen:        types.MainMenuScreen,
 			Focus:         types.MainFocus,
 			Cfg:           cfg,
@@ -47,29 +52,34 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyPressMsg:
 			s := msg.String()
-			switch msg.String() {
-			case "enter":
-				value := m.TimeInput.Value()
-				switch m.Screen {
-				case types.HistStart:
-					m.Query.StartDate = &types.TimePreset{
-						Display: value,
-						Value:   types.TimeValue(value),
-					}
-				case types.HistEnd:
-					m.Query.EndDate = &types.TimePreset{
-						Display: value,
-						Value:   types.TimeValue(value),
-					}
+			switch s {
+			case "enter", "l":
+				value := m.Input.Value()
+
+				t, err := m.ValidateQuery(value)
+				if err != nil {
+					m.ErrInput = err
+					return m, nil
 				}
 
-				m.TimeInput.Reset()
-				m.TimeInput.Blur()
+				switch m.Screen {
+				case types.HistStart:
+					m.Query.StartDate = t
+				case types.HistEnd:
+					m.Query.EndDate = t
+				}
+
+				m.Input.Reset()
+				m.Input.Blur()
 				m.Mode = types.NormalMode
+				m.ErrInput = nil
 				m.GoBack()
-			case "esc":
-				m.TimeInput.Blur()
+			case "esc", "h":
+				m.Input.Reset()
+				m.Input.Blur()
 				m.Mode = types.NormalMode
+				m.ErrInput = nil
+				m.GoBack()
 			case "backspace":
 				m.DeleteInputChar()
 			default:
@@ -78,12 +88,56 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-		m.TimeInput, cmd = m.TimeInput.Update(msg)
+		m.Input, cmd = m.Input.Update(msg)
 
 		m.ValidateTime()
 
 		return m, cmd
 	}
+
+	if m.Mode == types.EditMode && m.Screen == types.HistLimit {
+		switch msg := msg.(type) {
+		case tea.KeyPressMsg:
+			s := msg.String()
+			switch s {
+			case "enter", "l":
+				value := m.Input.Value()
+
+				limit, err := strconv.Atoi(value)
+				if err != nil {
+					m.ErrInput = err
+					return m, nil
+				}
+
+				m.Query.Limit = &limit
+
+				m.Input.Reset()
+				m.Input.Blur()
+				m.Mode = types.NormalMode
+				m.ErrInput = nil
+				m.GoBack()
+			case "esc", "h":
+				m.Input.Reset()
+				m.Input.Blur()
+				m.Mode = types.NormalMode
+				m.ErrInput = nil
+				m.GoBack()
+			case "backspace":
+			default:
+				if len(s) == 1 && (s[0] < '0' || s[0] > '9') {
+					return m, nil
+				}
+
+				if m.Input.Value() == "0" && s != "backspace" {
+					return m, nil
+				}
+			}
+		}
+		m.Input, cmd = m.Input.Update(msg)
+
+		return m, cmd
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -122,14 +176,35 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							}
 						}
 					}
+					screen := ui.HistoricalMenu[m.MainCursor].Target
+					switch screen {
+					case types.HistStart, types.HistEnd:
+						m.Mode = types.EditMode
+						m.Input.Focus()
+						format := ui.TimeFormats[m.Query.Schema.Value]
+						m.Input.Placeholder = format.Placeholder
+						m.Input.CharLimit = format.CharLimit
+					case types.HistLimit:
+						m.Mode = types.EditMode
+						m.Input.Focus()
+						m.Input.Placeholder = "0"
+						m.Input.CharLimit = 4
+					}
 					m.GoForward(ui.HistoricalMenu)
 				case types.SubmitFocus:
 					action := ui.SubmitChoices[m.SubmitCursor].Action
 
 					switch action {
 					case types.SubmitAction:
-						m.Screen = types.HistRequest
-						// call function
+						if m.Query.Dataset == nil || m.Query.Symbol == nil || m.Query.Schema == nil || m.Query.StartDate == nil || m.Query.EndDate == nil || m.Query.Limit == nil {
+							m.ErrQuery = errors.New("Incomplete query. All 5 fields must be filled")
+							m.Focus = types.MainFocus
+							m.MainCursor = 0
+							m.SubmitCursor = -1
+
+							return m, nil
+						}
+						m.GoForward(ui.SubmitChoices)
 					case types.ResetAction:
 						m.Query = types.Query{}
 					}
@@ -146,32 +221,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case types.HistSchema:
 				m.Query.Schema = &ui.Schemas[m.MainCursor]
 				m.GoBack()
-			case types.HistStart:
-				presets := m.Query.Schema.CompatiblePresets
-				if m.MainCursor == len(presets)-1 {
-					m.Mode = types.EditMode
-					m.TimeInput.Focus()
-					format := ui.TimeFormats[m.Query.Schema.Value]
-					m.TimeInput.Placeholder = format.Placeholder
-					m.TimeInput.CharLimit = format.CharLimit
-				} else {
-					m.Query.StartDate = &presets[m.MainCursor]
-					m.GoBack()
-				}
-			case types.HistEnd:
-				presets := m.Query.Schema.CompatiblePresets
-				if m.MainCursor == len(presets)-1 {
-					m.Mode = types.EditMode
-					m.TimeInput.Focus()
-					format := ui.TimeFormats[m.Query.Schema.Value]
-					m.TimeInput.Placeholder = format.Placeholder
-					m.TimeInput.CharLimit = format.CharLimit
-				} else {
-					m.Query.EndDate = &presets[m.MainCursor]
-					m.GoBack()
-				}
 			case types.HistLimit:
 				m.GoBack()
+			case types.HistRequest:
+				action := ui.RequestChoices[m.MainCursor].Action
+				switch action {
+				case types.CancelAction:
+					m.GoBack()
+				case types.ContinueAction:
+					//call api
+				}
 			default:
 				m.GoBack()
 			}
@@ -196,12 +255,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.FutureSymbols))
 			case types.HistSchema:
 				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.Schemas))
-			case types.HistStart:
-				m.MainCursor = IncreaseCursor(m.MainCursor, len(m.Query.Schema.CompatiblePresets))
-			case types.HistEnd:
-				m.MainCursor = IncreaseCursor(m.MainCursor, len(m.Query.Schema.CompatiblePresets))
 			case types.HistRequest:
-				// request screen logic
+				m.MainCursor = IncreaseCursor(m.MainCursor, len(ui.RequestChoices))
 			}
 		case "k", "up":
 			switch m.Focus {
@@ -249,9 +304,15 @@ func (m *Model) GoBack() {
 }
 
 func (m *Model) GoForward(menu []types.MenuItem) {
+	if m.Focus == types.SubmitFocus {
+		m.MainCursor = 0
+		m.SubmitCursor = -1
+	}
 	m.CursorStack = append(m.CursorStack, m.MainCursor)
 	m.Screen = menu[m.MainCursor].Target
 	m.MainCursor = 0
+	m.Focus = types.MainFocus
+	m.ErrQuery = nil
 }
 
 func IncreaseCursor(cursor int, max int) int {
@@ -261,120 +322,157 @@ func IncreaseCursor(cursor int, max int) int {
 	return cursor
 }
 
+func (m *Model) ValidateQuery(value string) (*time.Time, error) {
+	format := ui.TimeFormats[m.Query.Schema.Value]
+
+	location, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := time.ParseInLocation(
+		format.Layout,
+		value,
+		location,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	switch m.Screen {
+	case types.HistStart:
+		if m.Query.EndDate != nil && t.After(*m.Query.EndDate) {
+			return nil, errors.New("Start time cannot be after end time")
+		}
+		if m.Query.EndDate != nil && t.Equal(*m.Query.EndDate) {
+			return nil, errors.New("Start time cannot be the same as end time")
+		}
+	case types.HistEnd:
+		if m.Query.StartDate != nil && t.Before(*m.Query.StartDate) {
+			return nil, errors.New("End time cannot be before start time")
+		}
+		if m.Query.StartDate != nil && t.Equal(*m.Query.StartDate) {
+			return nil, errors.New("End time cannot be the same as start time")
+		}
+	}
+
+	return &t, nil
+}
+
 func (m *Model) ValidateTime() {
-	value := m.TimeInput.Value()
+	value := m.Input.Value()
 	switch len(value) {
 	case 1:
 		if value[0] != '1' && value[0] != '2' {
-			m.TimeInput.SetValue("")
+			m.Input.SetValue("")
 		}
 	case 2:
 		if value[0] == '1' {
 			if value[1] != '9' {
-				m.TimeInput.SetValue(value[:1])
+				m.Input.SetValue(value[:1])
 			}
 		} else {
 			if value[1] != '0' {
-				m.TimeInput.SetValue(value[:1])
+				m.Input.SetValue(value[:1])
 			}
 		}
 	case 3:
 		if value[1] == '0' {
 			if value[2] != '0' && value[2] != '1' && value[2] != '2' {
-				m.TimeInput.SetValue(value[:2])
+				m.Input.SetValue(value[:2])
 			}
 		}
 	case 4:
 		if value[1] == '0' && value[2] == '2' {
 			if value[3] > '6' {
-				m.TimeInput.SetValue(value[:3])
+				m.Input.SetValue(value[:3])
 			}
 		}
-		if len(m.TimeInput.Value()) == 4 {
-			m.TimeInput.SetValue(value + "-")
+		if len(m.Input.Value()) == 4 {
+			m.Input.SetValue(value + "-")
 		}
 	case 6:
 		if value[5] != '0' && value[5] != '1' {
-			m.TimeInput.SetValue(value[:5])
+			m.Input.SetValue(value[:5])
 		}
 	case 7:
 		if value[5] == '1' {
 			if value[6] != '0' && value[6] != '1' && value[6] != '2' {
-				m.TimeInput.SetValue(value[:6])
+				m.Input.SetValue(value[:6])
 			}
 		} else {
 			if value[6] == '0' {
-				m.TimeInput.SetValue(value[:6])
+				m.Input.SetValue(value[:6])
 			}
 		}
-		if len(m.TimeInput.Value()) == 7 {
-			m.TimeInput.SetValue(value + "-")
+		if len(m.Input.Value()) == 7 {
+			m.Input.SetValue(value + "-")
 		}
 	case 9:
 		if value[8] > '3' {
-			m.TimeInput.SetValue(value[:8])
+			m.Input.SetValue(value[:8])
 		}
 	case 10:
 		if value[8] == '3' {
 			if value[9] > '1' {
-				m.TimeInput.SetValue(value[:9])
+				m.Input.SetValue(value[:9])
 			}
 		} else if value[8] == '0' {
 			if value[9] == '0' {
-				m.TimeInput.SetValue(value[:9])
+				m.Input.SetValue(value[:9])
 			}
 		}
-		if len(m.TimeInput.Value()) == 10 {
+		if len(m.Input.Value()) == 10 {
 			input := ui.TimeFormats[m.Query.Schema.Value]
 			if input.CharLimit > 10 {
-				m.TimeInput.SetValue(value + "T")
+				m.Input.SetValue(value + "T")
 			}
 		}
 	case 12:
 		if value[11] > '2' {
-			m.TimeInput.SetValue(value[:11])
+			m.Input.SetValue(value[:11])
 		}
 	case 13:
 		if value[11] == '2' {
 			if value[12] > '3' {
-				m.TimeInput.SetValue(value[:12])
+				m.Input.SetValue(value[:12])
 			}
 		}
-		if len(m.TimeInput.Value()) == 13 {
+		if len(m.Input.Value()) == 13 {
 			input := ui.TimeFormats[m.Query.Schema.Value]
 			if input.CharLimit > 13 {
-				m.TimeInput.SetValue(value + ":")
+				m.Input.SetValue(value + ":")
 			}
 		}
 	case 15:
 		if value[14] > '5' {
-			m.TimeInput.SetValue(value[:14])
+			m.Input.SetValue(value[:14])
 		}
 	case 16:
 		input := ui.TimeFormats[m.Query.Schema.Value]
 		if input.CharLimit > 16 {
-			m.TimeInput.SetValue(value + ":")
+			m.Input.SetValue(value + ":")
 		}
 	case 18:
 		if value[17] > '5' {
-			m.TimeInput.SetValue(value[:14])
+			m.Input.SetValue(value[:17])
 		}
 	}
-	m.TimeInput.CursorEnd()
+	m.Input.CursorEnd()
 }
 
 func (m *Model) DeleteInputChar() {
-	value := m.TimeInput.Value()
+	value := m.Input.Value()
 	if len(value) == 5 && value[4:] == "-" {
-		m.TimeInput.SetValue(value[:4])
+		m.Input.SetValue(value[:4])
 	} else if len(value) == 8 && value[7:] == "-" {
-		m.TimeInput.SetValue(value[:7])
+		m.Input.SetValue(value[:7])
 	} else if len(value) == 11 && value[10:] == "T" {
-		m.TimeInput.SetValue(value[:10])
+		m.Input.SetValue(value[:10])
 	} else if len(value) == 14 && value[13:] == ":" {
-		m.TimeInput.SetValue(value[:13])
+		m.Input.SetValue(value[:13])
 	} else if len(value) == 17 && value[16:] == ":" {
-		m.TimeInput.SetValue(value[:16])
+		m.Input.SetValue(value[:16])
 	}
-	m.TimeInput.CursorEnd()
+	m.Input.CursorEnd()
 }

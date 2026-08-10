@@ -3,6 +3,7 @@ package types
 import (
 	"charm.land/bubbles/v2/textinput"
 	"github.com/adanrsantos/TradeTUI/types"
+	"time"
 )
 
 type DatabentoModel struct {
@@ -10,9 +11,11 @@ type DatabentoModel struct {
 	CursorStack   []int
 	SubmitCursor  int
 	SettingCursor int
-	TimeInput     textinput.Model
+	Input         textinput.Model
+	ErrInput      error
 	Mode          Mode
 	Query         Query
+	ErrQuery      error
 	Screen        Screen
 	Focus         Focus
 	Cfg           *types.ProviderDetails
@@ -23,8 +26,8 @@ type Query struct {
 	Dataset   *Dataset
 	Symbol    *Symbol
 	Schema    *Schema
-	StartDate *TimePreset
-	EndDate   *TimePreset
+	StartDate *time.Time
+	EndDate   *time.Time
 	Limit     *int
 }
 
@@ -40,9 +43,8 @@ type Symbol struct {
 }
 
 type Schema struct {
-	Display           string
-	Value             string
-	CompatiblePresets []TimePreset
+	Display string
+	Value   string
 }
 
 type MenuItem struct {
@@ -65,26 +67,6 @@ const (
 	EditMode
 )
 
-type TimeValue string
-
-const (
-	MarketOpen  TimeValue = "09:30"
-	MarketClose TimeValue = "16:00"
-	AsiaOpen    TimeValue = "20:00"
-	LondonOpen  TimeValue = "03:00"
-	Midnight    TimeValue = "00:00"
-	Noon        TimeValue = "12:00"
-
-	Custom TimeValue = "Custom"
-
-	NYHourOpen TimeValue = "09:00"
-)
-
-type TimePreset struct {
-	Display string
-	Value   TimeValue
-}
-
 type QueryField int
 
 const (
@@ -101,6 +83,8 @@ type Action int
 const (
 	SubmitAction Action = iota
 	ResetAction
+	ContinueAction
+	CancelAction
 )
 
 type Focus int
