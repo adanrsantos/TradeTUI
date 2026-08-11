@@ -61,6 +61,18 @@ type TimeFormat struct {
 	CharLimit   int
 }
 
+type OHLCV struct {
+	TsEvent      uint64 `json:"ts_event"`
+	RType        uint8  `json:"rtype"`
+	PublisherID  uint16 `json:"publisher_id"`
+	InstrumentID uint32 `json:"instrument_id"`
+	Open         int64  `json:"open"`
+	High         int64  `json:"high"`
+	Low          int64  `json:"low"`
+	Close        int64  `json:"close"`
+	Volume       uint64 `json:"volume"`
+}
+
 type Mode int
 
 const (

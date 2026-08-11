@@ -240,7 +240,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case types.CancelAction:
 					m.GoBack()
 				case types.ContinueAction:
-					//call api
+					candles, err := api.HistoryRequest(m.Query, m.Secret)
+					if err != nil {
+						m.ErrQuery = err
+						return m, nil
+					}
+					err = api.SaveCandles(candles)
+					if err != nil {
+						m.ErrQuery = err
+						return m, nil
+					}
 				}
 			default:
 				m.GoBack()
