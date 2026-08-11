@@ -1,16 +1,16 @@
 package databento
 
 import (
+	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"errors"
-	"strconv"
-	"time"
-	//"github.com/adanrsantos/TradeTUI/providers/databento/api"
-	"charm.land/bubbles/v2/textinput"
+	"github.com/adanrsantos/TradeTUI/providers/databento/api"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
 	"github.com/adanrsantos/TradeTUI/providers/databento/ui"
 	globalTypes "github.com/adanrsantos/TradeTUI/types"
+	"strconv"
+	"time"
 )
 
 type Model struct {
@@ -32,6 +32,7 @@ func New(cfg *globalTypes.ProviderDetails, secret string) *Model {
 			ErrInput:      nil,
 			Mode:          types.NormalMode,
 			Query:         types.Query{},
+			QueryEstimate: 0,
 			ErrQuery:      nil,
 			Screen:        types.MainMenuScreen,
 			Focus:         types.MainFocus,
@@ -204,6 +205,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 							return m, nil
 						}
+						estimate, err := api.HistoryEstimateCost(m.Query, m.Secret)
+						if err != nil {
+							m.ErrQuery = err
+							m.Focus = types.MainFocus
+							m.MainCursor = 0
+							m.SubmitCursor = -1
+
+							return m, nil
+						}
+						m.QueryEstimate = estimate
 						m.GoForward(ui.SubmitChoices)
 					case types.ResetAction:
 						m.Query = types.Query{}

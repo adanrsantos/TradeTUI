@@ -15,6 +15,7 @@ type DatabentoModel struct {
 	ErrInput      error
 	Mode          Mode
 	Query         Query
+	QueryEstimate float64
 	ErrQuery      error
 	Screen        Screen
 	Focus         Focus

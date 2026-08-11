@@ -56,11 +56,11 @@ var Datasets = []types.Dataset{
 var FutureSymbols = []types.Symbol{
 	{
 		Display: "E-mini Nasdaq-100 (NQ)",
-		Value:   "NQ",
+		Value:   "NQU6",
 	},
 	{
 		Display: "E-mini S&P 500 (ES)",
-		Value:   "ES",
+		Value:   "ESU6",
 	},
 	{
 		Display: "E-mini Dow Jones (YM)",

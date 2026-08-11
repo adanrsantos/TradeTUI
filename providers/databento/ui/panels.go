@@ -95,7 +95,8 @@ func MainMenu(m *types.DatabentoModel) string {
 }
 
 func RawQueryView(m *types.DatabentoModel) string {
-	return ""
+
+	return fmt.Sprintf("%f", m.QueryEstimate)
 }
 
 func Header(secret string) string {
