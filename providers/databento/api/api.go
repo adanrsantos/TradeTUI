@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
+	"io"
 	"net/http"
 	"net/url"
-	// "strconv"
-	"io"
+	"strconv"
 )
 
 func HistoryEstimateCost(query types.Query, apiKey string) (float64, error) {
@@ -24,6 +24,9 @@ func HistoryEstimateCost(query types.Query, apiKey string) (float64, error) {
 		"end",
 		query.EndDate.Format("2006-01-02T15:04:05"),
 	)
+	if *query.Limit != 0 {
+		params.Set("limit", strconv.Itoa(*query.Limit))
+	}
 
 	reqURL := "https://hist.databento.com/v0/metadata.get_cost?" + params.Encode()
 
