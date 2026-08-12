@@ -26,18 +26,21 @@ func SaveCandles(candles []types.OHLCV) error {
 	}
 
 	timestamp := time.Now().Format("2006-01-02T15-04-05")
-
-	filename := timestamp + ".json"
+	filename := timestamp + ".jsonl"
 
 	filePath := filepath.Join(dataDir, filename)
 
-	data, err := json.MarshalIndent(candles, "", "	")
+	file, err := os.Create(filePath)
 	if err != nil {
-		return fmt.Errorf("Failed to encode candles: %w", err)
+		return fmt.Errorf("Failed ot create file: %w", err)
 	}
+	defer file.Close()
 
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		return fmt.Errorf("Failed to save candles to %s: %w", filePath, err)
+	encoder := json.NewEncoder(file)
+	for _, candle := range candles {
+		if err := encoder.Encode(candle); err != nil {
+			return fmt.Errorf("Failed to encode candle: %w", err)
+		}
 	}
 
 	return nil
