@@ -95,8 +95,15 @@ func MainMenu(m *types.DatabentoModel) string {
 }
 
 func RawQueryView(m *types.DatabentoModel) string {
+	var s strings.Builder
 
-	return fmt.Sprintf("%f", m.QueryEstimate)
+	fmt.Fprintf(&s, "%f", m.QueryEstimate)
+
+	if m.ErrQuery != nil {
+		fmt.Fprintf(&s, "\n%s", ErrorStyle.Render(m.ErrQuery.Error()))
+	}
+
+	return s.String()
 }
 
 func Header(secret string) string {
