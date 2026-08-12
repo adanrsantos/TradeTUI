@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/adanrsantos/TradeTUI/providers/databento/types"
@@ -17,27 +16,28 @@ import (
 func SaveCandles(candles []types.OHLCV) error {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("Failed to get working directory: %w", err)
 	}
 
 	dataDir := filepath.Join(cwd, "data", "databento")
 
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
-		return fmt.Errorf("failed to create data directory: %w", err)
+		return fmt.Errorf("Failed to create data directory: %w", err)
 	}
 
-	data, err := json.MarshalIndent(candles, "", "\t")
+	timestamp := time.Now().Format("2006-01-02T15-04-05")
+
+	filename := timestamp + ".json"
+
+	filePath := filepath.Join(dataDir, filename)
+
+	data, err := json.MarshalIndent(candles, "", "	")
 	if err != nil {
-		return fmt.Errorf("failed to encode candles: %w", err)
+		return fmt.Errorf("Failed to encode candles: %w", err)
 	}
-
-	filePath := filepath.Join(dataDir, "candles.json")
-
-	fmt.Println("Saving candles:", len(candles))
-	fmt.Println("Saving to:", filePath)
 
 	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		return fmt.Errorf("failed to save candles to %s: %w", filePath, err)
+		return fmt.Errorf("Failed to save candles to %s: %w", filePath, err)
 	}
 
 	return nil
@@ -63,7 +63,7 @@ func HistoryRequest(query types.Query, apiKey string) ([]types.OHLCV, error) {
 
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("Failed to create request: %w", err)
 	}
 
 	req.SetBasicAuth(apiKey, "")
@@ -71,46 +71,28 @@ func HistoryRequest(query types.Query, apiKey string) ([]types.OHLCV, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to contact Databento: %w", err)
+		return nil, fmt.Errorf("Failed to contact Databento: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read Databento error response: %w", err)
-		}
-
-		return nil, fmt.Errorf(
-			"Databento request failed (%s): %s",
-			resp.Status,
-			string(body),
-		)
-	}
+	decoder := json.NewDecoder(resp.Body)
 
 	var candles []types.OHLCV
 
-	scanner := bufio.NewScanner(resp.Body)
-
-	for scanner.Scan() {
+	for {
 		var candle types.OHLCV
 
-		if err := json.Unmarshal(scanner.Bytes(), &candle); err != nil {
-			return nil, fmt.Errorf(
-				"failed to decode Databento candle: %w\nresponse: %s",
-				err,
-				scanner.Text(),
-			)
+		err := decoder.Decode(&candle)
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to decode response body: %w", err)
 		}
 
 		candles = append(candles, candle)
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf(
-			"failed to read Databento response: %w",
-			err,
-		)
 	}
 
 	return candles, nil
@@ -133,7 +115,7 @@ func HistoryEstimateCost(query types.Query, apiKey string) (float64, error) {
 
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create request: %w", err)
+		return 0, fmt.Errorf("Failed to create request: %w", err)
 	}
 
 	req.SetBasicAuth(apiKey, "")
@@ -141,13 +123,13 @@ func HistoryEstimateCost(query types.Query, apiKey string) (float64, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, fmt.Errorf("failed to contact Databento: %w", err)
+		return 0, fmt.Errorf("Failed to contact Databento: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, fmt.Errorf("failed to read Databento response: %w", err)
+		return 0, fmt.Errorf("Failed to read Databento response: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -161,7 +143,7 @@ func HistoryEstimateCost(query types.Query, apiKey string) (float64, error) {
 	var cost float64
 	if err := json.Unmarshal(body, &cost); err != nil {
 		return 0, fmt.Errorf(
-			"failed to decode Databento response: %w; response: %s",
+			"Failed to decode Databento response: %w; response: %s",
 			err,
 			string(body),
 		)

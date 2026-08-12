@@ -250,6 +250,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.ErrQuery = err
 						return m, nil
 					}
+					m.GoBack()
+					m.GoBack()
+					m.Query = types.Query{}
 				}
 			default:
 				m.GoBack()

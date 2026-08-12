@@ -62,15 +62,19 @@ type TimeFormat struct {
 }
 
 type OHLCV struct {
-	TsEvent      uint64 `json:"ts_event"`
-	RType        uint8  `json:"rtype"`
-	PublisherID  uint16 `json:"publisher_id"`
-	InstrumentID uint32 `json:"instrument_id"`
-	Open         int64  `json:"open"`
-	High         int64  `json:"high"`
-	Low          int64  `json:"low"`
-	Close        int64  `json:"close"`
-	Volume       uint64 `json:"volume"`
+	Header Header `json:"hd"`
+	Open   int64  `json:"open,string"`
+	High   int64  `json:"high,string"`
+	Low    int64  `json:"low,string"`
+	Close  int64  `json:"close,string"`
+	Volume uint64 `json:"volume,string"`
+}
+
+type Header struct {
+	Ts_event      uint64 `json:"ts_event,string"`
+	Rtype         uint8  `json:"rtype"`
+	Publisher_id  uint16 `json:"publisher_id"`
+	Instrument_id uint32 `json:"instrument_id"`
 }
 
 type Mode int
