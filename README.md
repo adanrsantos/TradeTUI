@@ -29,11 +29,11 @@ TradeTUI is a terminal-based trading application written in Go. It provides a TU
 - Go 1.24+ recommended
 - A Databento API key for Databento functionality
 ### Clone the repository
-git clone https://github.com/adanrsantos/TradeTUI.git
-cd TradeTUI
+- git clone https://github.com/adanrsantos/TradeTUI.git
+- cd TradeTUI
 ### Configure environment variables
-Create a .env file in the project root:
-DATABENTO_API_KEY=your_api_key_here
-API keys are intentionally kept out of application state/configuration files.
+- Create a .env file in the project root:
+- DATABENTO_API_KEY=your_api_key_here
+- API keys are intentionally kept out of application state/configuration files.
 ### Run TradeTUI
-go run main.go
+- go run main.go
